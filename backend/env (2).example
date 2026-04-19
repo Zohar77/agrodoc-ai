@@ -1,0 +1,20 @@
+# ── ANTHROPIC ──────────────────────────────────────────────────────
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# ── WHATSAPP ───────────────────────────────────────────────────────
+WHATSAPP_TOKEN=your_whatsapp_access_token_here
+WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id_here
+WHATSAPP_VERIFY_TOKEN=agrodoc_webhook_secret_2026
+
+# ── FIX #1 — APP KEY (shared secret between your frontend and backend)
+# Generate any strong random string — e.g. openssl rand -hex 32
+APP_KEY=generate_a_strong_random_key_here
+
+# ── ADMIN KEY (for analytics, feedback stats, audit log, market updates)
+ADMIN_KEY=generate_a_different_strong_key_here
+
+# ── SERVER ─────────────────────────────────────────────────────────
+PORT=3000
+NODE_ENV=production
+ALLOWED_ORIGINS=https://agrodoc.ng,https://agrodoc-ai.netlify.app
+RATE_LIMIT_MAX=30
