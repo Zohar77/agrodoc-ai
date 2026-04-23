@@ -1,4 +1,4 @@
-//import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIGURATION — UPDATE BOTH VALUES AFTER YOU DEPLOY ON RENDER
@@ -8,7 +8,7 @@ const BACKEND_URL = "https://agrodoc-ai.onrender.com"; // ← CHANGE THIS
 
 // Step 2: Must match APP_KEY in your backend .env file exactly
 // This is the shared secret that locks your API — never share it publicly
-const APP_KEY = "agrodoc2026secretkey123456789abc"; // ← CHANGE THIS TO MATCH YOUR .env APP_KEY
+const APP_KEY = "your_app_key_here"; // ← CHANGE THIS TO MATCH YOUR .env APP_KEY
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ const WMO_CODES = { 0:"☀️ Clear", 1:"🌤 Mostly Clear", 2:"⛅ Partly Cloud
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-  function AgroDocAI() {
+export default function AgroDocAI() {
   const [lang, setLang] = useState("en");
   const [mode, setMode] = useState("farmer");
   const [tab, setTab] = useState("diagnose");
@@ -154,7 +154,8 @@ const WMO_CODES = { 0:"☀️ Clear", 1:"🌤 Mostly Clear", 2:"⛅ Partly Cloud
   const [dealerSubmitting, setDealerSubmitting] = useState(false);
   const [directory, setDirectory]          = useState([]);
   const [dirSearch, setDirSearch]          = useState("");
-  const fileRef = useRef();
+  const fileRef   = useRef();
+  const cameraRef = useRef();
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
@@ -472,12 +473,31 @@ const WMO_CODES = { 0:"☀️ Clear", 1:"🌤 Mostly Clear", 2:"⛅ Partly Cloud
               ))}
             </div>
 
-            <div className="uz" onClick={()=>fileRef.current.click()} style={{ marginBottom:11 }}>
-              {image
-                ? <img src={image} alt="subject" style={{ width:"100%", maxHeight:175, objectFit:"cover", borderRadius:10 }}/>
-                : <><div style={{ fontSize:32, marginBottom:5 }}>📷</div><div style={{ color:"#a7f3d0", fontWeight:600, fontSize:13 }}>Tap to upload photo</div><div style={{ fontSize:10, color:"#4b7a5e", marginTop:3 }}>{CATEGORIES.find(c=>c.id===category)?.emoji} {CATEGORIES.find(c=>c.id===category)?.label}</div></>
-              }
-              <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{ display:"none" }} onChange={e=>handleFile(e.target.files[0])}/>
+            {/* Camera snap + gallery upload */}
+            <div style={{ marginBottom:11 }}>
+              {image ? (
+                <div style={{ position:"relative" }}>
+                  <img src={image} alt="subject" style={{ width:"100%", maxHeight:200, objectFit:"cover", borderRadius:12 }}/>
+                  <button onClick={()=>{setImage(null);setImageBase64(null);}} style={{ position:"absolute", top:8, right:8, background:"rgba(0,0,0,.6)", border:"none", color:"#fff", borderRadius:"50%", width:28, height:28, fontSize:14, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+                </div>
+              ) : (
+                <div style={{ display:"flex", gap:8 }}>
+                  {/* Snap with camera */}
+                  <div className="uz" onClick={()=>cameraRef.current.click()} style={{ flex:1, padding:"18px 10px" }}>
+                    <div style={{ fontSize:28, marginBottom:4 }}>📸</div>
+                    <div style={{ color:"#a7f3d0", fontWeight:700, fontSize:12 }}>Take Photo</div>
+                    <div style={{ fontSize:10, color:"#4b7a5e", marginTop:2 }}>Snap directly</div>
+                    <input ref={cameraRef} type="file" accept="image/*" capture="environment" style={{ display:"none" }} onChange={e=>handleFile(e.target.files[0])}/>
+                  </div>
+                  {/* Upload from gallery */}
+                  <div className="uz" onClick={()=>fileRef.current.click()} style={{ flex:1, padding:"18px 10px" }}>
+                    <div style={{ fontSize:28, marginBottom:4 }}>🖼️</div>
+                    <div style={{ color:"#a7f3d0", fontWeight:700, fontSize:12 }}>From Gallery</div>
+                    <div style={{ fontSize:10, color:"#4b7a5e", marginTop:2 }}>Choose photo</div>
+                    <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e=>handleFile(e.target.files[0])}/>
+                  </div>
+                </div>
+              )}
             </div>
             <div style={{ textAlign:"center", color:"#4b7a5e", fontSize:10, marginBottom:8, fontFamily:"'Space Mono',monospace" }}>— or describe symptoms —</div>
             <textarea className="ta" rows={3} placeholder="Describe what you see..." value={text} onChange={e=>setText(e.target.value)} style={{ marginBottom:12 }}/>
