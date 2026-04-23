@@ -1,24 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<title>AgroDoc AI — Your AI Farm Doctor</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #07130a; }
-  #root { min-height: 100vh; }
-</style>
-</head>
-<body>
-<div id="root"></div>
-<script type="text/babel" data-presets="react">
-const { useState, useRef, useEffect, useCallback } = React;
+//import { useState, useRef, useEffect, useCallback } from "react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIGURATION — UPDATE BOTH VALUES AFTER YOU DEPLOY ON RENDER
@@ -125,7 +105,7 @@ const WMO_CODES = { 0:"☀️ Clear", 1:"🌤 Mostly Clear", 2:"⛅ Partly Cloud
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-function AgroDocAI() {
+function AgroDocAI
   const [lang, setLang] = useState("en");
   const [mode, setMode] = useState("farmer");
   const [tab, setTab] = useState("diagnose");
@@ -926,10 +906,3 @@ function AgroDocAI() {
     </div>
   );
 }
-
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(AgroDocAI));
-</script>
-</body>
-</html>
