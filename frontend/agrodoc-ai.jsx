@@ -105,7 +105,7 @@ const WMO_CODES = { 0:"☀️ Clear", 1:"🌤 Mostly Clear", 2:"⛅ Partly Cloud
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function AgroDocAI() {
+function AgroDocAI() {() {
   const [lang, setLang] = useState("en");
   const [mode, setMode] = useState("farmer");
   const [tab, setTab] = useState("diagnose");
