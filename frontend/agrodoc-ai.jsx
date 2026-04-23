@@ -8,7 +8,7 @@ const BACKEND_URL = "https://agrodoc-ai.onrender.com"; // ← CHANGE THIS
 
 // Step 2: Must match APP_KEY in your backend .env file exactly
 // This is the shared secret that locks your API — never share it publicly
-const APP_KEY = "your_app_key_here"; // ← CHANGE THIS TO MATCH YOUR .env APP_KEY
+const APP_KEY = "APP_KEY = agrodoc2026secretkey123456789abc"; // ← CHANGE THIS TO MATCH YOUR .env APP_KEY
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
