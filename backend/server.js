@@ -319,7 +319,7 @@ app.get("/api/directory",generalLimiter,(req,res)=>{
   res.json({count:safe.length,listings:safe});
 });
 
-// WhatsApp
+// ── META WhatsApp Webhook ─────────────────────────────────────────────────────
 app.get("/webhook",(req,res)=>{if(req.query["hub.mode"]==="subscribe"&&req.query["hub.verify_token"]===process.env.WHATSAPP_VERIFY_TOKEN)return res.status(200).send(req.query["hub.challenge"]);return res.status(403).send("Forbidden");});
 app.post("/webhook",whatsappLimiter,express.json(),async(req,res)=>{
   res.sendStatus(200);
@@ -328,9 +328,25 @@ app.post("/webhook",whatsappLimiter,express.json(),async(req,res)=>{
     const msg=req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
     const contact=req.body?.entry?.[0]?.changes?.[0]?.value?.contacts?.[0];
     if(!msg)return;
-    // FIX #2 — Per-phone-number rate limiting happens inside whatsapp.js
     await handleWhatsAppMessage(msg,contact);
-  }catch(err){console.error("WhatsApp:",err.message);}
+  }catch(err){console.error("WhatsApp Meta error:",err.message);}
+});
+
+// ── TWILIO WhatsApp Webhook ───────────────────────────────────────────────────
+// Used for testing before Meta Business API approval
+// Set WHATSAPP_PROVIDER=twilio in Render environment variables to activate
+const { handleTwilioMessage } = require("./whatsapp");
+app.post("/webhook/twilio", whatsappLimiter, express.urlencoded({ extended:false }), async(req,res)=>{
+  try {
+    await handleTwilioMessage(req);
+    // Twilio expects TwiML response
+    res.set("Content-Type","text/xml");
+    res.send("<Response></Response>");
+  } catch(err) {
+    console.error("Twilio webhook error:", err.message);
+    res.set("Content-Type","text/xml");
+    res.send("<Response></Response>");
+  }
 });
 
 // Error handling
