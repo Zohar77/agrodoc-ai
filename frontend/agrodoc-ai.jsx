@@ -1,4 +1,4 @@
-//import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIGURATION — UPDATE BOTH VALUES AFTER YOU DEPLOY ON RENDER
@@ -81,14 +81,40 @@ const VETS = [
   { name:"Kano State Vet Services", type:"Government", state:"Kano", phone:"064-642-200", speciality:"Northern livestock, cattle" },
 ];
 const OFFLINE_CACHE = {
-  "cassava mosaic":{ category:"crops", disease:"Cassava Mosaic Disease", subject:"Cassava", severity:"severe", description:"Yellow/green mosaic patterns on leaves. Whitefly-transmitted virus. 20–95% yield loss.", treatment:["Remove and destroy all infected plants immediately","Spray Confidor (Imidacloprid) to kill whiteflies","Replant with resistant varieties TME 419 or NR 8082","Keep field weed-free"], pesticide:"Confidor (Imidacloprid)", prevention:"Use certified disease-free cuttings. Plant early.", confidence:"high" },
-  "maize streak":{ category:"crops", disease:"Maize Streak Virus", subject:"Maize", severity:"severe", description:"Yellow streaks on leaves. Leafhopper-transmitted. Up to 100% yield loss.", treatment:["Remove severely infected plants","Spray Karate to kill leafhoppers","Replant SAMMAZ 15 or SAMMAZ 27","Plant early before leafhopper season"], pesticide:"Karate (Lambda-cyhalothrin)", prevention:"Early planting. Resistant varieties.", confidence:"high" },
-  "tomato blight":{ category:"crops", disease:"Early Blight (Alternaria)", subject:"Tomato", severity:"moderate", description:"Brown target-board spots on lower leaves. Spreads upward in wet weather.", treatment:["Remove infected leaves","Spray Ridomil Gold MZ every 7 days","Stake plants for airflow","Avoid overhead watering"], pesticide:"Ridomil Gold MZ or Funguran OH", prevention:"Rotate crops. Mulch base.", confidence:"high" },
-  "rice blast":{ category:"crops", disease:"Rice Blast (Magnaporthe)", subject:"Rice", severity:"severe", description:"Diamond grey lesions on leaves. Can destroy entire panicle.", treatment:["Apply Beam at first signs","Drain field 2–3 days","Reduce nitrogen fertilizer","Monitor weekly"], pesticide:"Beam (Tricyclazole) or Tilt", prevention:"Resistant varieties. Balanced NPK.", confidence:"high" },
-  "newcastle":{ category:"poultry", disease:"Newcastle Disease (NCD)", subject:"Chicken/Poultry", severity:"severe", description:"Gasping, twisted neck, green diarrhoea, sudden deaths. Can wipe out a flock in days.", treatment:["Isolate all sick birds immediately","Vaccinate healthy birds with Lasota NOW","Bury or burn dead birds","Disinfect pen with Izal or formalin"], pesticide:"Lasota ND Vaccine + broad-spectrum antibiotics", prevention:"Vaccinate Day 1, Day 14, every 3 months.", confidence:"high", disclaimer:"⚠️ See a vet immediately if losses are high." },
-  "gumboro":{ category:"poultry", disease:"Gumboro Disease (IBD)", subject:"Chicken/Poultry", severity:"severe", description:"Ruffled feathers, white watery droppings, hunched birds aged 3–6 weeks.", treatment:["Isolate affected birds","Provide electrolytes in drinking water","Vaccinate healthy chicks with IBD vaccine","Increase warmth in pen"], pesticide:"IBD Vaccine + antibiotics for secondary infections", prevention:"Vaccinate Day 14 and Day 28.", confidence:"high", disclaimer:"⚠️ Consult a vet for vaccine schedule." },
-  "columnaris":{ category:"fish", disease:"Columnaris (Saddle Rot)", subject:"Catfish/Tilapia", severity:"severe", description:"White/grey patches on skin and gills. Fish breathe fast at surface. Kills in 24–48 hours.", treatment:["30–50% water change immediately","Add 3–5g salt per litre","Treat with Terramycin in feed or water","Reduce stocking density"], pesticide:"Terramycin (Oxytetracycline) or Potassium Permanganate", prevention:"Good water quality. Don't overcrowd.", confidence:"high", disclaimer:"⚠️ Act fast — Columnaris kills within 24–48 hours." },
-  "ppr":{ category:"livestock", disease:"PPR (Peste des Petits Ruminants)", subject:"Goat/Sheep", severity:"severe", description:"High fever, eye/nose discharge, mouth sores, severe diarrhoea. Can kill 80–90% of flock.", treatment:["Isolate sick animals immediately","Vaccinate all healthy animals with PPR vaccine NOW","Antibiotics for secondary infections","Report to state vet — PPR is notifiable"], pesticide:"PPR Vaccine + Oxytetracycline", prevention:"Vaccinate every 3 years. Don't mix unknown animals.", confidence:"high", disclaimer:"⚠️ PPR is notifiable — contact your state vet office immediately." },
+  // ── CROPS (14 diseases) ────────────────────────────────────────────────────
+  "cassava mosaic":{category:"crops",disease:"Cassava Mosaic Disease",subject:"Cassava",severity:"severe",description:"Yellow and green mosaic patterns spread across the leaves. This is caused by a virus carried by whitefly insects. Left untreated it can destroy 20 to 95% of your harvest. Act immediately.",treatment:["Remove and burn every infected plant right away — do not compost them","Spray Confidor (Imidacloprid) on the remaining healthy plants to kill whiteflies","Replant using resistant varieties like TME 419 or NR 8082 which are certified disease-free","Keep your field completely weed-free as weeds shelter the whiteflies that spread the virus"],pesticide:"Confidor (Imidacloprid) — available at most agro-input stores",prevention:"Always use certified disease-free stems from a trusted source. Plant at the start of the rainy season. Control weeds consistently.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. For severe outbreaks contact your state ADP office."},
+  "cassava bacterial":{category:"crops",disease:"Cassava Bacterial Blight",subject:"Cassava",severity:"moderate",description:"Water-soaked angular spots appear on the leaves, stems develop cankers and the plant begins to wilt. This spreads through infected cutting tools and rainwater splashing between plants.",treatment:["Cut off and burn all infected stems — do not leave them on the ground","Never work in your cassava field when the leaves are wet from rain or dew","Soak your cutting tools in bleach solution between each plant you cut","Replace with healthy certified planting material from a trusted source"],pesticide:"Copper-based bactericide spray — ask at your agro-input store",prevention:"Always use certified cuttings. Rotate your field to a different crop every 2 to 3 seasons. Clean all tools before and after use.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact your state ADP for persistent infections."},
+  "maize streak":{category:"crops",disease:"Maize Streak Virus",subject:"Maize",severity:"severe",description:"Bright yellow streaks run along the leaves making them look striped. This virus is carried by leafhoppers and can cause up to 100% yield loss if not controlled quickly.",treatment:["Pull out and destroy all severely infected plants immediately","Spray Karate on healthy plants to kill the leafhoppers carrying the virus","Replant with resistant varieties — SAMMAZ 15 or SAMMAZ 27 work well in Nigeria","Plant as early as possible in the season before leafhopper populations peak"],pesticide:"Karate (Lambda-cyhalothrin) — widely available in Nigeria",prevention:"Early planting is the single most effective prevention. Use resistant varieties. Keep the field weed-free at all times.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact your state ADP for field-level support."},
+  "maize stalk rot":{category:"crops",disease:"Maize Stalk Rot (Fusarium)",subject:"Maize",severity:"moderate",description:"The stalk becomes soft and rotten from the base upward. The plant falls over before harvest. This fungal disease thrives in wet, waterlogged conditions and poor soil nutrition.",treatment:["Harvest immediately before the entire plant collapses and you lose everything","Dig drainage channels around your field to remove excess water","Space plants wider apart so air can flow between them — overcrowding worsens the disease","Apply potassium-rich fertilizer at planting to build stronger stalks"],pesticide:"Prevention is most effective — no single chemical cure exists",prevention:"Balanced NPK fertilizer especially potassium. Good field drainage. Crop rotation every season.",confidence:"high",disclaimer:"AgroDoc AI is advisory only."},
+  "tomato blight":{category:"crops",disease:"Early Blight (Alternaria solani)",subject:"Tomato",severity:"moderate",description:"Brown spots with a target-board ring pattern appear on the lower leaves first then spread upward through the plant. Wet and humid weather makes it spread much faster.",treatment:["Pick off and dispose of all infected leaves well away from your field — never compost them","Spray Ridomil Gold MZ on the remaining healthy plant every 7 days until symptoms stop","Stake your plants and tie them up properly so air can flow between them","Water at the base of the plant only — never spray water on the leaves"],pesticide:"Ridomil Gold MZ 68WP or Funguran OH (Copper Oxychloride)",prevention:"Rotate your tomato crop to a different area each season. Mulch around the base. Use drip irrigation if possible.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Consult an agronomist for severe outbreaks."},
+  "tomato late blight":{category:"crops",disease:"Late Blight (Phytophthora infestans)",subject:"Tomato",severity:"severe",description:"Dark water-soaked patches appear on leaves and fruits rapidly. White mould grows on the underside of leaves. This disease can destroy an entire field within days during the rainy season.",treatment:["Spray Ridomil Gold MZ immediately on all plants — do not wait even one day","Remove and burn every infected plant — this disease is extremely contagious","Avoid walking through your field when plants are wet as you will spread it on your feet and clothes","Improve drainage around your field immediately"],pesticide:"Ridomil Gold MZ 68WP — spray every 5 days during the rainy season",prevention:"Plant resistant varieties. Avoid planting tomatoes at the peak of the rainy season if possible.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact your state ADP for emergency field support."},
+  "rice blast":{category:"crops",disease:"Rice Blast (Magnaporthe oryzae)",subject:"Rice",severity:"severe",description:"Diamond-shaped grey lesions with brown borders appear on leaves. When it reaches the panicle it can cause 100% yield loss. It spreads fastest during humid nights with heavy dew.",treatment:["Apply Beam (Tricyclazole) at the very first sign of any lesion — early treatment is critical","Drain your field for 2 to 3 days to reduce humidity","Reduce your nitrogen fertilizer immediately — too much nitrogen makes the disease worse","Spray again after 10 days if symptoms continue spreading"],pesticide:"Beam (Tricyclazole) 75WP or Tilt (Propiconazole)",prevention:"Use blast-resistant rice varieties. Apply balanced NPK fertilizer — avoid excess nitrogen. Maintain good drainage at all times.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact your state ADP rice extension team."},
+  "pepper wilt":{category:"crops",disease:"Pepper Wilt (Phytophthora capsici)",subject:"Pepper",severity:"moderate",description:"Pepper plants suddenly wilt and collapse even when the soil appears moist. Dark rot is visible at the base of the stem. This soil-borne disease thrives in waterlogged conditions.",treatment:["Immediately dig drainage channels around your pepper bed to remove standing water","Drench the soil around remaining healthy plants with Ridomil Gold solution","Remove and burn all wilted plants completely including the roots","Do not plant pepper in the same spot for at least 3 years"],pesticide:"Ridomil Gold MZ (Metalaxyl + Mancozeb) soil drench",prevention:"Always use raised beds for pepper. Never let water sit around the base of plants. Rotate crops every 3 seasons.",confidence:"high",disclaimer:"AgroDoc AI is advisory only."},
+  "yam anthracnose":{category:"crops",disease:"Yam Anthracnose",subject:"Yam",severity:"moderate",description:"Dark brown or black spots appear on leaves and stems. Affected leaves curl up and die. The disease reduces both the size and quality of your yam tubers significantly.",treatment:["Cut off and burn all infected leaves and stems — dispose far from your field","Spray Dithane M-45 (Mancozeb) on remaining healthy plants every 2 weeks","Widen the spacing between your yam mounds to allow better airflow","Stake your yam vines early so they grow upright with good air circulation"],pesticide:"Dithane M-45 (Mancozeb) or Copper Oxychloride",prevention:"Always plant from healthy certified setts. Give adequate spacing between plants. Stake vines as soon as they begin to grow.",confidence:"high",disclaimer:"AgroDoc AI is advisory only."},
+  "groundnut rosette":{category:"crops",disease:"Groundnut Rosette Virus",subject:"Groundnut",severity:"severe",description:"Plants become severely stunted. Leaves turn yellow and develop a mottled pattern. No pods form on infected plants. This aphid-spread virus is devastating especially in the dry season.",treatment:["Pull out and destroy every infected plant immediately — they cannot be saved","Spray Actara or Dimethoate to kill the aphids that are spreading the virus","Plant as early as possible in the season before the aphid population builds up","Use resistant varieties SAMNUT 22 or SAMNUT 24 which tolerate the virus"],pesticide:"Actara (Thiamethoxam) or Dimethoate for aphid control",prevention:"Early planting is your strongest protection. Use resistant varieties. Destroy all crop residue after harvest to remove aphid shelter.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact your state ADP for regional resistant variety advice."},
+  "cowpea mosaic":{category:"crops",disease:"Cowpea Mosaic Virus",subject:"Cowpea / Beans",severity:"moderate",description:"Yellow-green mosaic patterns develop on leaves. Plants are stunted and produce much lower yields. Aphids and beetles carry this virus from plant to plant across your field.",treatment:["Remove and destroy all severely infected plants before the virus spreads further","Spray Cypermethrin to kill the aphids and beetles carrying the virus","Plant resistant varieties — IT90K-277-2 or IT97K-499-35 are recommended in Nigeria","Keep your field weed-free as weeds are a reservoir for aphids"],pesticide:"Cypermethrin or Dimethoate spray — widely available in Nigeria",prevention:"Use certified seeds from a trusted supplier. Maintain a consistent insect spray programme. Weed your field regularly.",confidence:"high",disclaimer:"AgroDoc AI is advisory only."},
+  "plantain sigatoka":{category:"crops",disease:"Black Sigatoka (Mycosphaerella fijiensis)",subject:"Plantain / Banana",severity:"severe",description:"Dark brown to black streaks develop on leaves. Affected leaves die early before the plant can fill its fruit properly. This causes significant reduction in bunch weight and quality.",treatment:["Cut off and burn all infected leaves at the base — remove them completely from the farm","Spray Mancozeb or Propiconazole every 3 weeks during the growing season","Widen the spacing between your plantain stands to improve airflow between plants","Wrap your bunches with clear plastic bags to protect the fruit from infection"],pesticide:"Dithane M-45 (Mancozeb) or Tilt (Propiconazole)",prevention:"Use resistant varieties where available. Remove dead leaves regularly. Give adequate spacing between plants.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact CRIN for technical support on cocoa and plantain diseases."},
+  "cocoa pod rot":{category:"crops",disease:"Cocoa Black Pod Disease (Phytophthora palmivora)",subject:"Cocoa",severity:"severe",description:"Black rotting patches spread rapidly across cocoa pods especially during the rainy season. Infected pods produce no usable cocoa beans. This disease can destroy an entire cocoa farm within weeks if not treated.",treatment:["Remove and destroy every infected pod immediately — even ones that look only slightly affected","Spray Copper Oxychloride on all healthy pods every 2 to 3 weeks during the rainy season","Prune your cocoa canopy to open it up and allow sunlight and airflow into the farm","Harvest all ripe pods as soon as they are ready — do not leave them on the tree"],pesticide:"Copper Oxychloride 50WP or Ridomil Gold spray",prevention:"Prune regularly to reduce humidity under the canopy. Remove all mummified pods from the tree and ground. Keep drainage channels clear.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact the Cocoa Research Institute of Nigeria (CRIN) in Ibadan for technical support."},
+  "okra mosaic":{category:"crops",disease:"Okra Mosaic Virus",subject:"Okra",severity:"moderate",description:"Yellow mosaic patterns develop on okra leaves. Fruits become malformed and the plant produces much less than expected. Whiteflies carry this virus between plants across your field.",treatment:["Remove and destroy all heavily infected plants immediately","Spray Confidor (Imidacloprid) to kill the whiteflies that are spreading the virus","Use yellow sticky traps placed around your field to catch whiteflies before they reach your plants","Plant on raised beds with good drainage to keep plants healthy and more resistant"],pesticide:"Confidor (Imidacloprid) for whitefly control",prevention:"Early planting avoids peak whitefly season. Weed your field regularly. Neem oil spray as a natural preventive measure.",confidence:"medium",disclaimer:"AgroDoc AI is advisory only."},
+  // ── POULTRY (6 diseases) ───────────────────────────────────────────────────
+  "newcastle":{category:"poultry",disease:"Newcastle Disease (NCD)",subject:"Chicken / Poultry",severity:"severe",description:"Affected birds gasp for breath, twist their necks, have green or yellow watery droppings and die suddenly. This disease can kill your entire flock within 2 to 3 days. It spreads through the air and contact between birds.",treatment:["Isolate every sick bird from the rest of the flock immediately — do not mix them","Vaccinate ALL remaining healthy birds with Lasota vaccine right now — this is urgent","Bury or burn every dead bird properly — never leave carcasses in the open","Disinfect the entire pen thoroughly with Izal, formalin or Septol solution"],pesticide:"Lasota ND Vaccine (live) + broad-spectrum antibiotics for secondary infections",prevention:"Vaccinate at Day 1, Day 14, then every 3 months without fail. Practice strict biosecurity — no visitors in the pen, sanitise equipment, control wild birds.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Contact a veterinarian IMMEDIATELY if losses exceed 5% in one day. Newcastle Disease is notifiable to state veterinary authorities."},
+  "gumboro":{category:"poultry",disease:"Gumboro Disease (Infectious Bursal Disease)",subject:"Chicken / Poultry",severity:"severe",description:"Affected chicks aged 3 to 6 weeks have ruffled feathers, sit hunched, stop eating and have white watery droppings. This disease destroys the immune system permanently, leaving survivors vulnerable to every other disease.",treatment:["Separate all sick birds from the healthy ones immediately","Add electrolytes and vitamins to the drinking water of all birds to support recovery","Vaccinate the healthy chicks with IBD (Gumboro) vaccine immediately if not already done","Increase the temperature in the brooder and reduce stress — stressed birds die faster"],pesticide:"IBD Gumboro Vaccine + antibiotics for secondary bacterial infections",prevention:"Vaccinate at Day 14 and again at Day 28 of every batch. Disinfect your pen thoroughly between batches. Never mix birds of different ages.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Consult a veterinarian for the correct vaccine schedule for your specific flock size and history."},
+  "coccidiosis":{category:"poultry",disease:"Coccidiosis",subject:"Chicken / Poultry",severity:"moderate",description:"Birds produce bloody dark brown droppings, lose their appetite and hang their wings. They huddle together near heat sources. This parasite thrives in wet and dirty litter and can kill young birds rapidly.",treatment:["Add Amprolium (Amprol) to all drinking water for 5 to 7 days continuously","Remove all the wet and dirty litter from the pen immediately and replace with dry fresh litter","Improve drainage around the pen so rainwater does not collect and make the litter wet","Add vitamin A and vitamin K supplements to feed to support recovery"],pesticide:"Amprolium (Amprol) or Embazin Forte in drinking water",prevention:"Keep litter dry at all times. Do not overcrowd your pen. Use coccidiostat-medicated starter feed for all new chicks.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Consult a veterinarian for the correct Amprolium dosage for your flock size."},
+  "fowl pox":{category:"poultry",disease:"Fowl Pox",subject:"Chicken / Poultry",severity:"moderate",description:"Wart-like scabs appear on the comb, wattles and face. White or yellow patches develop inside the mouth and throat making it hard for birds to eat and breathe. Mosquitoes carry this virus between birds.",treatment:["Separate all affected birds from the flock to prevent further spread","Apply iodine solution gently to the skin scabs every day until they dry up","Vaccinate all healthy birds with Fowl Pox vaccine in the wing web immediately","Remove any standing water around your farm — it breeds the mosquitoes that spread the virus"],pesticide:"Fowl Pox Vaccine (wing-web route) + Tetracycline for secondary infections",prevention:"Vaccinate all birds at 6 to 8 weeks of age. Install insect screens on your pen to keep mosquitoes out.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Consult your poultry veterinarian for vaccination protocols."},
+  "avian typhoid":{category:"poultry",disease:"Fowl Typhoid (Salmonella gallinarum)",subject:"Chicken / Poultry",severity:"moderate",description:"Birds develop pale or greenish-yellow watery droppings and their combs become pale and shrunken. Adult birds die suddenly in large numbers. This bacterial infection spreads through contaminated water, feed and equipment.",treatment:["Treat the entire flock with Enrofloxacin (Baytril) in the drinking water for 5 consecutive days","Isolate all birds showing symptoms immediately to prevent further spread","Clean and disinfect all drinkers, feeders and equipment every single day","Prevent wild birds from entering your pen — they carry and spread this bacteria"],pesticide:"Enrofloxacin 10% solution (Baytril) in water — follow veterinarian prescription",prevention:"Buy chicks only from reputable vaccinated hatcheries. Vaccinate with Fowl Typhoid combination vaccine. Practice strict biosecurity.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Antibiotic use must follow veterinarian prescription to prevent resistance."},
+  "marek's disease":{category:"poultry",disease:"Marek's Disease",subject:"Chicken / Poultry",severity:"severe",description:"Birds aged 6 to 20 weeks develop progressive paralysis of the legs and wings. One or both eyes may turn grey. Infected birds lose weight rapidly and die. There is no cure — this herpesvirus is permanent once contracted.",treatment:["There is no treatment — birds with severe paralysis should be culled humanely","Vaccinate ALL day-old chicks at the hatchery before they arrive on your farm","Practice strict all-in all-out management — never mix new birds with existing flocks","Thoroughly clean and disinfect the entire pen between every batch of birds"],pesticide:"Marek's Disease Vaccine must be given at day old at the hatchery — no other timing works",prevention:"Never buy unvaccinated day-old chicks. Vaccinate every single bird at day old without exception.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Marek's vaccine MUST be administered at the hatchery on the day of hatching — contact your veterinarian supplier."},
+  // ── FISH (5 diseases) ─────────────────────────────────────────────────────
+  "columnaris":{category:"fish",disease:"Columnaris Disease (Saddle Rot)",subject:"Catfish / Tilapia",severity:"severe",description:"White or grey patches appear on the skin, fins and gills of fish. Affected fish breathe rapidly at the water surface and stop eating. This bacteria kills fish within 24 to 48 hours in warm water. Act immediately.",treatment:["Change 30 to 50% of the pond water immediately — do this right now","Dissolve 3 to 5 grams of salt per litre of pond water to slow the bacteria","Treat with Terramycin (Oxytetracycline) mixed into the feed for 7 to 10 days","Reduce your stocking density urgently — overcrowding is the main cause"],pesticide:"Terramycin (Oxytetracycline) in medicated feed or Potassium Permanganate bath at 10mg/L for 20 minutes",prevention:"Test your water quality weekly. Never overcrowd your pond. Quarantine all new fish for 2 weeks before adding to existing ponds.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Act immediately — Columnaris kills within 24 to 48 hours. Contact your state Fisheries Department for emergency support."},
+  "gill disease":{category:"fish",disease:"Bacterial Gill Disease",subject:"Catfish / Tilapia",severity:"moderate",description:"Fish gasp rapidly at the water surface. Their gills appear pale, dark or covered in mucus. They stop eating and become lethargic. High ammonia from overfeeding or overcrowding is usually the root cause.",treatment:["Change 40% of the pond water immediately without waiting","Increase aeration in the pond — add aerators or paddle wheels to raise oxygen levels","Give the fish a Potassium Permanganate bath at 10mg/L for 20 minutes then return to clean water","Remove all uneaten feed from the pond and dispose of any dead fish immediately"],pesticide:"Potassium Permanganate bath + salt treatment",prevention:"Test your water quality at least once a week. Feed only what fish can eat in 5 minutes. Never overcrowd. Do regular partial water changes.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Contact your state Fisheries Department for water quality testing equipment and support."},
+  "ich":{category:"fish",disease:"White Spot Disease (Ich — Ichthyophthirius)",subject:"Fish",severity:"moderate",description:"Small white spots that look like grains of salt cover the body and fins of the fish. Affected fish scratch frantically against the sides and bottom of the pond. They swim erratically and lose their appetite.",treatment:["Gradually raise the water temperature to 28 to 30°C if possible — heat kills the parasite","Add 3 grams of salt per litre of pond water and maintain for 7 to 10 days","Treat with Formalin solution at 25ml per 1,000 litres of water for 1 hour then remove fish","Do a 30% water change after treatment to remove the parasite eggs from the pond"],pesticide:"Formalin solution or Malachite Green (handle with care — both are toxic at high doses)",prevention:"Quarantine all new fish for at least 2 weeks before adding to your pond. Keep water temperature above 25°C consistently.",confidence:"high",disclaimer:"AgroDoc AI is advisory only. Handle Formalin and Malachite Green with extreme care — they are toxic chemicals. Use gloves and work in ventilated areas."},
+  "catfish aeromoniasis":{category:"fish",disease:"Aeromonas Infection (Ulcer Disease)",subject:"Catfish",severity:"severe",description:"Red bleeding ulcers appear on the skin of the fish. The fins bleed at their base. Fish develop a bloated belly and die rapidly. This bacteria spreads very fast through an entire pond once it starts.",treatment:["Change 50% of the pond water immediately — this is urgent","Mix Oxytetracycline into the fish feed and give for 10 consecutive days","Give affected fish a salt bath at 5 grams per litre for 30 minutes","Remove every dead fish from the pond immediately — leaving them spreads the bacteria to healthy fish"],pesticide:"Terramycin (Oxytetracycline) in medicated feed",prevention:"Maintain clean water quality at all times. Avoid any injury to fish during handling. Reduce your stocking density to the recommended level for your pond size.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Aeromonas spreads extremely fast. Contact your state Fisheries Department immediately."},
+  "tilapia lake virus":{category:"fish",disease:"Tilapia Lake Virus (TiLV)",subject:"Tilapia",severity:"severe",description:"Fish develop sunken eyes, skin ulcers and bleeding under the skin. They swim abnormally and in circles. Mass death occurs rapidly across the entire pond. This is an emerging viral disease with no cure.",treatment:["There is no treatment — immediate containment is the only option","Remove and safely dispose of all dead fish by deep burial or burning — never throw in rivers","Disinfect all equipment, nets and containers with chlorine solution before any reuse","Report the outbreak to your state Fisheries Department immediately"],pesticide:"No chemical treatment available — biosecurity measures only",prevention:"Buy fish fingerlings only from certified hatcheries with known health records. Never mix fish from different sources in the same pond.",confidence:"medium",disclaimer:"⚠️ AgroDoc AI is advisory only. TiLV is a notifiable disease — report immediately to your state Fisheries Department. Do not move fish from affected ponds."},
+  // ── LIVESTOCK (5 diseases) ────────────────────────────────────────────────
+  "ppr":{category:"livestock",disease:"PPR — Peste des Petits Ruminants",subject:"Goat / Sheep",severity:"severe",description:"Animals develop a very high fever with thick discharge from eyes and nose. Painful sores develop inside the mouth. Severe watery diarrhoea follows and pneumonia develops. This disease kills 80 to 90% of infected animals if untreated.",treatment:["Isolate EVERY sick animal from the rest of the herd immediately — this is highly contagious","Vaccinate ALL remaining healthy animals with PPR vaccine right now without waiting","Inject affected animals with Oxytetracycline to fight the secondary pneumonia infection","Report the outbreak to your state veterinary office — PPR is a notifiable disease in Nigeria"],pesticide:"PPR Vaccine for prevention + Oxytetracycline LA injection for secondary pneumonia",prevention:"Vaccinate your entire herd every 3 years without fail. Never introduce animals from unknown sources without quarantine. Keep records of all vaccinations.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. PPR IS NOTIFIABLE — contact your state veterinary office and NAFDAC immediately. Moving infected animals is an offence under Nigerian law."},
+  "foot and mouth":{category:"livestock",disease:"Foot and Mouth Disease (FMD)",subject:"Cattle / Goat",severity:"severe",description:"Animals develop a very high fever followed by painful blisters inside the mouth and on the feet. Excessive drooling and severe lameness make it impossible for animals to eat or walk properly. This disease spreads through the air and is extremely contagious.",treatment:["Isolate ALL affected animals immediately in a separate pen far from the healthy herd","Clean mouth sores gently with sodium bicarbonate solution twice daily","Apply antiseptic spray to foot lesions daily to prevent secondary infection","Report to your state veterinary authority immediately — this is mandatory by law"],pesticide:"FMD Vaccine for prevention. Only supportive care is available — there is no cure.",prevention:"Vaccinate your herd twice every year. Disinfect all equipment, vehicles and clothing that enter your farm. Control the movement of people and animals.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. FMD IS NOTIFIABLE — contact your state vet and NAFDAC immediately. Moving infected animals is illegal under Nigerian animal disease law."},
+  "african swine fever":{category:"livestock",disease:"African Swine Fever (ASF)",subject:"Pig",severity:"severe",description:"Pigs develop a very high fever. Their skin turns red then blue-purple in patches. They have bloody diarrhoea and die suddenly within days. This disease has a 100% fatality rate and no treatment or vaccine exists.",treatment:["There is no treatment — all infected pigs must be culled immediately to prevent spread","Report the outbreak to your state veterinary authority as an emergency — this is legally required","Disinfect every part of your farm including buildings, equipment and clothing with caustic soda solution","Do not sell, move or eat any pigs from the farm under any circumstances"],pesticide:"No treatment or vaccine available — containment and culling only",prevention:"Strict biosecurity at all times. Never allow wild boar near your farm. Never feed kitchen waste or food scraps to pigs. Screen all visitors and vehicles.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. ASF IS FATAL AND NOTIFIABLE. Report immediately to your state veterinary authority. Moving infected pigs is a criminal offence in Nigeria."},
+  "trypanosomiasis":{category:"livestock",disease:"Trypanosomiasis (Sleeping Sickness)",subject:"Cattle / Goat",severity:"severe",description:"Animals become increasingly thin and weak despite eating. Their coat becomes rough and dull. They develop anaemia — pale gums and eyes — and eventually become unable to stand. This disease is spread by tsetse flies in forest and bush areas.",treatment:["Treat affected animals with Berenil (Diminazene aceturate) injection — a single dose is usually effective","Repeat the treatment after 3 weeks if the animal has not recovered fully","Set up tsetse fly traps with insecticide around your grazing area","Move your animals away from dense bush and forest areas where tsetse flies breed"],pesticide:"Berenil (Diminazene aceturate) — must be administered by a certified veterinarian only",prevention:"Use trypanotolerant breeds like N'Dama or Muturu cattle where possible. Install tsetse fly control measures. Avoid grazing in high-risk bush areas.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Berenil MUST be given by a certified veterinarian — overdose is fatal to the animal. Do not attempt injection yourself."},
+  "lumpy skin":{category:"livestock",disease:"Lumpy Skin Disease (LSD)",subject:"Cattle",severity:"moderate",description:"Large firm nodules (lumps) develop all over the skin. The animal develops a fever and reduced milk production. Nasal discharge and swollen lymph nodes follow. Biting insects including mosquitoes and flies spread this disease between animals.",treatment:["Isolate all affected cattle from the rest of the herd immediately","Clean each skin nodule with antiseptic solution and apply wound spray to prevent secondary infection","Inject affected cattle with antibiotics such as Oxytetracycline to prevent secondary bacterial infections","Vaccinate all remaining healthy cattle with LSD vaccine immediately"],pesticide:"LSD Vaccine for prevention + Oxytetracycline LA for secondary infections",prevention:"Vaccinate your entire cattle herd annually. Use insecticide-treated nets and sprays to control biting insects. Avoid moving cattle during known outbreak periods.",confidence:"high",disclaimer:"⚠️ AgroDoc AI is advisory only. Lumpy Skin Disease is notifiable in Nigeria — report confirmed cases to your state veterinary office."},
 };
 const INITIAL_OUTBREAKS = [
   { id:1, lat:6.5244,  lng:3.3792,  disease:"Cassava Mosaic",    category:"crops",    reports:12, date:"2026-04-01", state:"Lagos"   },
@@ -105,18 +131,21 @@ const WMO_CODES = { 0:"☀️ Clear", 1:"🌤 Mostly Clear", 2:"⛅ Partly Cloud
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-function AgroDocAI
+function AgroDocAI() {
   const [lang, setLang] = useState("en");
   const [mode, setMode] = useState("farmer");
   const [tab, setTab] = useState("diagnose");
-  // Fix #2 — ToS acceptance modal
   const [tosAccepted, setTosAccepted] = useState(() => localStorage.getItem("agrodoc_tos") === "yes");
-  // Fix #3 — Registration
   const [showRegister, setShowRegister] = useState(false);
   const [regForm, setRegForm] = useState({ name:"", phone:"", state:"" });
   const [registered, setRegistered] = useState(() => !!localStorage.getItem("agrodoc_uid"));
-  // Fix #5 — Feedback
   const [showFeedback, setShowFeedback] = useState(false);
+  // Push notifications
+  const [notifEnabled, setNotifEnabled] = useState(false);
+  // Price alerts
+  const [priceAlerts, setPriceAlerts] = useState(() => { try { return JSON.parse(localStorage.getItem("agrodoc_alerts")||"[]"); } catch { return []; } });
+  const [showAlertForm, setShowAlertForm] = useState(false);
+  const [alertForm, setAlertForm] = useState({ crop:"Maize", threshold:30000, direction:"below" });
   // Fix #6 — Market price timestamp
   const [priceUpdated] = useState(new Date().toLocaleString("en-NG", { dateStyle:"medium", timeStyle:"short" }));
   const [category, setCategory] = useState("crops");
@@ -158,6 +187,56 @@ function AgroDocAI
   const cameraRef = useRef();
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+
+  // ── SERVICE WORKER + PUSH NOTIFICATIONS ─────────────────────────────────────
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    }
+    if (Notification.permission === 'granted') setNotifEnabled(true);
+  }, []);
+
+  const enableNotifications = async () => {
+    if (!('Notification' in window)) { showToast("⚠️ Notifications not supported on this browser"); return; }
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      setNotifEnabled(true);
+      showToast("✅ Disease outbreak alerts enabled!");
+      new Notification("🌿 AgroDoc AI", { body:"You will now receive disease outbreak alerts for your area." });
+    } else {
+      showToast("❌ Notification permission denied");
+    }
+  };
+
+  // ── PRICE ALERTS ─────────────────────────────────────────────────────────────
+  const saveAlert = () => {
+    const newAlerts = [...priceAlerts, { ...alertForm, id: Date.now(), active: true }];
+    setPriceAlerts(newAlerts);
+    localStorage.setItem("agrodoc_alerts", JSON.stringify(newAlerts));
+    setShowAlertForm(false);
+    showToast("✅ Price alert saved!");
+  };
+  const deleteAlert = (id) => {
+    const updated = priceAlerts.filter(a => a.id !== id);
+    setPriceAlerts(updated);
+    localStorage.setItem("agrodoc_alerts", JSON.stringify(updated));
+    showToast("🗑 Alert removed");
+  };
+
+  // Check price alerts against market data
+  useEffect(() => {
+    if (priceAlerts.length === 0 || !notifEnabled) return;
+    priceAlerts.forEach(alert => {
+      const marketItem = MARKET_PRICES.find(m => m.crop.toLowerCase().includes(alert.crop.toLowerCase()));
+      if (!marketItem) return;
+      const triggered = alert.direction === 'below' ? marketItem.price < alert.threshold : marketItem.price > alert.threshold;
+      if (triggered && Notification.permission === 'granted') {
+        new Notification(`💰 Price Alert — ${alert.crop}`, {
+          body: `${alert.crop} is now ₦${marketItem.price.toLocaleString()} — ${alert.direction} your target of ₦${alert.threshold.toLocaleString()}`
+        });
+      }
+    });
+  }, [priceAlerts, notifEnabled]);
 
   // Fetch approved directory listings from backend
   const fetchDirectory = useCallback(async (type="") => {
@@ -386,172 +465,287 @@ function AgroDocAI
     { id:"market",   icon:"💰", label:"Market"   },
     { id:"journal",  icon:"📒", label:"Journal"  },
     { id:"find",     icon:"📍", label:"Find"     },
+    { id:"settings", icon:"⚙️", label:"Settings" },
   ];
 
   return (
-    <div style={{ fontFamily:"'Outfit',sans-serif", minHeight:"100vh", background:"linear-gradient(160deg,#07130a 0%,#0d2818 55%,#071a10 100%)", color:"#e8f5e9", paddingBottom:70 }}>
+    <div style={{ fontFamily:"'Outfit',sans-serif", minHeight:"100vh", background:"linear-gradient(160deg,#050e07 0%,#0a1f10 50%,#060d08 100%)", color:"#e8f5e9", paddingBottom:80 }}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
       <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}
-        ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#2d6a4f}
-        .lb{background:transparent;border:1px solid #2d6a4f;color:#a7f3d0;padding:3px 8px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;transition:all .2s}
-        .lb.on{background:#2d6a4f;color:#fff}
-        .uz{border:2px dashed #2d6a4f;border-radius:14px;padding:22px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(45,106,79,.07)}
-        .uz:hover{border-color:#4ade80;background:rgba(74,222,128,.08)}
-        .pbtn{background:linear-gradient(135deg,#16a34a,#4ade80);color:#0a1a0f;border:none;padding:13px;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer;width:100%;font-family:'Outfit',sans-serif;transition:all .2s}
-        .pbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,222,128,.35)}
-        .pbtn:disabled{opacity:.45;cursor:not-allowed}
-        .sbtn{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.35);color:#4ade80;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:4px}
-        .sbtn:hover{background:rgba(74,222,128,.18)}
-        .sbtn.wa{border-color:rgba(37,211,102,.45);color:#25d366;background:rgba(37,211,102,.07)}
-        .card{background:rgba(255,255,255,.04);border:1px solid rgba(45,106,79,.3);border-radius:14px;padding:15px;margin-bottom:12px}
-        .ta{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(45,106,79,.4);border-radius:10px;padding:11px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:14px;resize:none;outline:none}
-        .ta:focus{border-color:#4ade80}
-        .inp{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(45,106,79,.4);border-radius:10px;padding:10px 12px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:13px;outline:none}
-        .inp:focus{border-color:#4ade80}
-        .catbtn{flex:1;padding:8px 4px;border:1px solid rgba(45,106,79,.3);background:transparent;color:#6b9e7e;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;transition:all .2s;text-align:center}
-        .catbtn.on{color:#0a1a0f;border-color:transparent}
-        .mt{display:flex;background:rgba(255,255,255,.04);border-radius:10px;padding:3px;border:1px solid rgba(45,106,79,.3)}
-        .mb{flex:1;padding:6px;border:none;background:transparent;color:#6b9e7e;border-radius:7px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s}
-        .mb.on{background:#2d6a4f;color:#fff}
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+        ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#1a5c36}
+
+        /* Language buttons */
+        .lb{background:transparent;border:1px solid rgba(110,229,105,.2);color:#7EB88A;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;transition:all .2s}
+        .lb.on{background:linear-gradient(135deg,#1a5c36,#2d8a50);color:#a8ffb0;border-color:transparent;box-shadow:0 2px 12px rgba(110,229,105,.2)}
+
+        /* Upload zone */
+        .uz{border:1.5px dashed rgba(110,229,105,.25);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(110,229,105,.03)}
+        .uz:hover{border-color:rgba(110,229,105,.5);background:rgba(110,229,105,.06)}
+
+        /* Primary button */
+        .pbtn{background:linear-gradient(135deg,#15803d,#22c55e,#6ee569);color:#071209;border:none;padding:14px;border-radius:14px;font-weight:900;font-size:15px;cursor:pointer;width:100%;font-family:'Outfit',sans-serif;transition:all .25s;letter-spacing:-.01em;box-shadow:0 4px 20px rgba(110,229,105,.2)}
+        .pbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 32px rgba(110,229,105,.35)}
+        .pbtn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+        /* Secondary button */
+        .sbtn{background:rgba(110,229,105,.06);border:1px solid rgba(110,229,105,.25);color:#6ee569;padding:8px 14px;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:5px}
+        .sbtn:hover{background:rgba(110,229,105,.14);border-color:rgba(110,229,105,.5)}
+        .sbtn.wa{border-color:rgba(37,211,102,.3);color:#25d366;background:rgba(37,211,102,.05)}
+        .sbtn.wa:hover{background:rgba(37,211,102,.12)}
+
+        /* Card */
+        .card{background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(110,229,105,.15);border-radius:18px;padding:16px;margin-bottom:12px;backdrop-filter:blur(4px)}
+
+        /* Textarea */
+        .ta{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(110,229,105,.2);border-radius:12px;padding:12px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:14px;resize:none;outline:none;transition:border-color .2s}
+        .ta:focus{border-color:rgba(110,229,105,.6);background:rgba(110,229,105,.03)}
+
+        /* Input */
+        .inp{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(110,229,105,.2);border-radius:12px;padding:11px 14px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+        .inp:focus{border-color:rgba(110,229,105,.6)}
+
+        /* Category buttons */
+        .catbtn{flex:1;padding:10px 4px;border:1.5px solid rgba(110,229,105,.15);background:rgba(255,255,255,.03);color:#5a8a65;border-radius:14px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;transition:all .25s;text-align:center;line-height:1.4}
+        .catbtn:hover{border-color:rgba(110,229,105,.35);background:rgba(110,229,105,.06)}
+        .catbtn.on{color:#071209;border-color:transparent;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+
+        /* Mode toggle */
+        .mt{display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:3px;border:1px solid rgba(110,229,105,.15)}
+        .mb{flex:1;padding:7px;border:none;background:transparent;color:#5a8a65;border-radius:9px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s}
+        .mb.on{background:linear-gradient(135deg,#1a5c36,#2d8a50);color:#a8ffb0;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+
+        /* Animations */
         .pulse{animation:pulse 1.4s infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-        .step{display:flex;gap:9px;align-items:flex-start;margin-bottom:7px}
-        .sn{background:#2d6a4f;color:#4ade80;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
-        .hi{display:flex;gap:9px;align-items:center;padding:10px;background:rgba(255,255,255,.02);border:1px solid rgba(45,106,79,.2);border-radius:11px;margin-bottom:8px;cursor:pointer;transition:all .2s}
-        .hi:hover{background:rgba(45,106,79,.15)}
-        .sbadge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
-        @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        .fi{animation:fi .3s ease forwards}
-        .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#166534;color:#dcfce7;padding:9px 20px;border-radius:20px;font-weight:700;font-size:13px;z-index:999;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.4);animation:fi .25s ease}
-        .bnav{position:fixed;bottom:0;left:0;right:0;background:#0d2818;border-top:1px solid rgba(45,106,79,.4);display:flex;max-width:480px;margin:0 auto;z-index:100}
-        .ntab{flex:1;padding:10px 4px 8px;border:none;background:transparent;color:#4b7a5e;cursor:pointer;font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;text-align:center;transition:all .2s}
-        .ntab.on{color:#4ade80}
-        .ntab span{display:block;font-size:19px;margin-bottom:2px}
-        .disclaimer{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.35);border-radius:9px;padding:9px;margin-bottom:9px;font-size:12px;color:#fca5a5}
-        .sectitle{font-size:10px;color:#4b7a5e;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-family:'Space Mono',monospace}
-        .popup{background:#0d2818;border:1px solid rgba(45,106,79,.5);border-radius:11px;padding:12px;margin-top:9px}
-        select.inp option{background:#0d2818;color:#e8f5e9}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+        .spin{animation:spin 1s linear infinite}
+        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+        /* Step */
+        .step{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+        .sn{background:linear-gradient(135deg,#1a5c36,#2d8a50);color:#a8ffb0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+        /* History item */
+        .hi{display:flex;gap:10px;align-items:center;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(110,229,105,.12);border-radius:14px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+        .hi:hover{background:rgba(110,229,105,.07);border-color:rgba(110,229,105,.3);transform:translateX(2px)}
+
+        /* Badge */
+        .sbadge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+
+        /* Fade in */
+        @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .fi{animation:fi .35s ease forwards}
+
+        /* Toast */
+        .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#14532d,#166534);color:#bbf7d0;padding:10px 22px;border-radius:24px;font-weight:700;font-size:13px;z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:fi .25s ease;border:1px solid rgba(110,229,105,.3)}
+
+        /* Bottom nav */
+        .bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(5,14,7,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(110,229,105,.12);display:flex;max-width:480px;margin:0 auto;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+        .ntab{flex:1;padding:10px 4px 9px;border:none;background:transparent;color:#3d6b4a;cursor:pointer;font-family:'Outfit',sans-serif;font-size:9.5px;font-weight:700;text-align:center;transition:all .2s;position:relative}
+        .ntab.on{color:#6ee569}
+        .ntab.on::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:20px;height:2.5px;background:linear-gradient(90deg,#6ee569,#a8ff6b);border-radius:2px}
+        .ntab span{display:block;font-size:20px;margin-bottom:3px}
+
+        /* Disclaimer */
+        .disclaimer{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#fca5a5;line-height:1.5}
+
+        /* Section title */
+        .sectitle{font-size:10px;color:#3d6b4a;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-family:'Space Mono',monospace}
+
+        /* Popup */
+        .popup{background:linear-gradient(135deg,rgba(10,31,16,.95),rgba(5,14,7,.95));border:1px solid rgba(110,229,105,.25);border-radius:14px;padding:14px;margin-top:10px;backdrop-filter:blur(8px)}
+
+        select.inp option{background:#0a1f10;color:#e8f5e9}
       `}</style>
 
       {toast && <div className="toast">{toast}</div>}
 
-      {/* HEADER */}
-      <div style={{ padding:"13px 15px 0", maxWidth:480, margin:"0 auto" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:9 }}>
-          <div>
-            <div style={{ fontSize:19, fontWeight:900, color:"#4ade80", letterSpacing:"-0.02em" }}>🌿 AgroDoc AI</div>
-            <div style={{ fontSize:10, color:"#6b9e7e", fontFamily:"'Space Mono',monospace" }}>Your AI Farm Doctor</div>
+      {/* ── HEADER ─────────────────────────────────────────────────────────────── */}
+      <div style={{ background:"linear-gradient(180deg,rgba(10,31,16,.98) 0%,transparent 100%)", padding:"14px 16px 12px", maxWidth:480, margin:"0 auto", position:"sticky", top:0, zIndex:50, backdropFilter:"blur(16px)", borderBottom:"1px solid rgba(110,229,105,.08)" }}>
+        {/* Top row */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:9 }}>
+            <div style={{ width:36, height:36, borderRadius:11, background:"linear-gradient(135deg,#164024,#2d8a50)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, boxShadow:"0 4px 12px rgba(110,229,105,.2)" }}>🌿</div>
+            <div>
+              <div style={{ fontSize:17, fontWeight:900, color:"#6ee569", letterSpacing:"-.02em", lineHeight:1.1 }}>AgroDoc AI</div>
+              <div style={{ fontSize:9, color:"#3d6b4a", fontFamily:"'Space Mono',monospace", letterSpacing:".05em" }}>YOUR AI FARM DOCTOR</div>
+            </div>
           </div>
-          <div style={{ display:"flex", gap:3, flexWrap:"wrap", justifyContent:"flex-end", maxWidth:215 }}>
+          <div style={{ display:"flex", gap:3, flexWrap:"wrap", justifyContent:"flex-end", maxWidth:200 }}>
             {Object.entries(LANGUAGES).map(([k,v])=>(
               <button key={k} className={`lb ${lang===k?"on":""}`} onClick={()=>setLang(k)}>{v.label}</button>
             ))}
           </div>
         </div>
-        {isOffline && <div style={{ background:"rgba(251,146,60,.1)", border:"1px solid rgba(251,146,60,.4)", borderRadius:8, padding:"6px 11px", fontSize:11, color:"#fb923c", marginBottom:9 }}>📵 Offline — cached results available</div>}
-        <div className="mt" style={{ marginBottom:13 }}>
-          <button className={`mb ${mode==="farmer"?"on":""}`} onClick={()=>setMode("farmer")}>🌾 Farmer</button>
-          <button className={`mb ${mode==="dealer"?"on":""}`} onClick={()=>setMode("dealer")}>🏪 Dealer/Vet</button>
+
+        {isOffline && <div style={{ background:"rgba(251,146,60,.08)", border:"1px solid rgba(251,146,60,.3)", borderRadius:10, padding:"6px 12px", fontSize:11, color:"#fb923c", marginBottom:8, display:"flex", alignItems:"center", gap:6 }}>📵 <span>Offline mode — cached results available</span></div>}
+
+        {/* Mode toggle */}
+        <div className="mt">
+          <button className={`mb ${mode==="farmer"?"on":""}`} onClick={()=>setMode("farmer")}>🌾 Farmer Mode</button>
+          <button className={`mb ${mode==="dealer"?"on":""}`} onClick={()=>setMode("dealer")}>🏪 Dealer / Vet</button>
         </div>
       </div>
 
       {/* CONTENT */}
-      <div style={{ padding:"0 15px", maxWidth:480, margin:"0 auto" }}>
+      <div style={{ padding:"12px 14px 0", maxWidth:480, margin:"0 auto" }}>
 
         {/* ══ DIAGNOSE TAB ══════════════════════════════════════════════════════ */}
         {tab==="diagnose" && (
           <div className="fi">
+            {/* Category selector */}
             <div className="sectitle">What are you diagnosing?</div>
-            <div style={{ display:"flex", gap:6, marginBottom:13 }}>
+            <div style={{ display:"flex", gap:8, marginBottom:14 }}>
               {CATEGORIES.map(c=>(
                 <button key={c.id} className={`catbtn ${category===c.id?"on":""}`}
-                  style={category===c.id?{ background:`#${CAT_COLORS[c.id]}`, color:"#0a1a0f" }:{}}
+                  style={category===c.id ? {
+                    background:`linear-gradient(135deg,#${CAT_COLORS[c.id]}cc,#${CAT_COLORS[c.id]})`,
+                    color:"#071209", fontWeight:800
+                  } : {}}
                   onClick={()=>{ setCategory(c.id); setResult(null); }}>
-                  {c.emoji}<br/><span style={{ fontSize:10 }}>{c.label}</span>
+                  <div style={{ fontSize:20, marginBottom:3 }}>{c.emoji}</div>
+                  <div style={{ fontSize:10 }}>{c.label}</div>
                 </button>
               ))}
             </div>
 
-            {/* Camera snap + gallery upload */}
-            <div style={{ marginBottom:11 }}>
+            {/* Photo upload */}
+            <div style={{ marginBottom:12 }}>
               {image ? (
-                <div style={{ position:"relative" }}>
-                  <img src={image} alt="subject" style={{ width:"100%", maxHeight:200, objectFit:"cover", borderRadius:12 }}/>
-                  <button onClick={()=>{setImage(null);setImageBase64(null);}} style={{ position:"absolute", top:8, right:8, background:"rgba(0,0,0,.6)", border:"none", color:"#fff", borderRadius:"50%", width:28, height:28, fontSize:14, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+                <div style={{ position:"relative", borderRadius:16, overflow:"hidden", boxShadow:"0 8px 32px rgba(0,0,0,.4)" }}>
+                  <img src={image} alt="subject" style={{ width:"100%", maxHeight:210, objectFit:"cover", display:"block" }}/>
+                  <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(0,0,0,.5),transparent)" }}/>
+                  <button onClick={()=>{setImage(null);setImageBase64(null);}} style={{ position:"absolute", top:10, right:10, background:"rgba(0,0,0,.6)", backdropFilter:"blur(8px)", border:"1px solid rgba(255,255,255,.2)", color:"#fff", borderRadius:"50%", width:30, height:30, fontSize:13, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+                  <div style={{ position:"absolute", bottom:10, left:12, fontSize:12, color:"rgba(255,255,255,.8)", fontWeight:600 }}>📷 Photo ready — tap Diagnose</div>
                 </div>
               ) : (
                 <div style={{ display:"flex", gap:8 }}>
-                  {/* Snap with camera */}
-                  <div className="uz" onClick={()=>cameraRef.current.click()} style={{ flex:1, padding:"18px 10px" }}>
-                    <div style={{ fontSize:28, marginBottom:4 }}>📸</div>
-                    <div style={{ color:"#a7f3d0", fontWeight:700, fontSize:12 }}>Take Photo</div>
-                    <div style={{ fontSize:10, color:"#4b7a5e", marginTop:2 }}>Snap directly</div>
+                  <div className="uz" onClick={()=>cameraRef.current.click()} style={{ flex:1, padding:"16px 8px", borderRadius:14 }}>
+                    <div style={{ fontSize:26, marginBottom:5 }}>📸</div>
+                    <div style={{ color:"#6ee569", fontWeight:700, fontSize:12 }}>Take Photo</div>
+                    <div style={{ fontSize:10, color:"#3d6b4a", marginTop:2 }}>Open camera</div>
                     <input ref={cameraRef} type="file" accept="image/*" capture="environment" style={{ display:"none" }} onChange={e=>handleFile(e.target.files[0])}/>
                   </div>
-                  {/* Upload from gallery */}
-                  <div className="uz" onClick={()=>fileRef.current.click()} style={{ flex:1, padding:"18px 10px" }}>
-                    <div style={{ fontSize:28, marginBottom:4 }}>🖼️</div>
-                    <div style={{ color:"#a7f3d0", fontWeight:700, fontSize:12 }}>From Gallery</div>
-                    <div style={{ fontSize:10, color:"#4b7a5e", marginTop:2 }}>Choose photo</div>
+                  <div className="uz" onClick={()=>fileRef.current.click()} style={{ flex:1, padding:"16px 8px", borderRadius:14 }}>
+                    <div style={{ fontSize:26, marginBottom:5 }}>🖼️</div>
+                    <div style={{ color:"#6ee569", fontWeight:700, fontSize:12 }}>Gallery</div>
+                    <div style={{ fontSize:10, color:"#3d6b4a", marginTop:2 }}>Choose photo</div>
                     <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e=>handleFile(e.target.files[0])}/>
                   </div>
                 </div>
               )}
             </div>
-            <div style={{ textAlign:"center", color:"#4b7a5e", fontSize:10, marginBottom:8, fontFamily:"'Space Mono',monospace" }}>— or describe symptoms —</div>
-            <textarea className="ta" rows={3} placeholder="Describe what you see..." value={text} onChange={e=>setText(e.target.value)} style={{ marginBottom:12 }}/>
+
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+              <div style={{ flex:1, height:"1px", background:"rgba(110,229,105,.1)" }}/>
+              <div style={{ fontSize:10, color:"#3d6b4a", fontWeight:600 }}>OR DESCRIBE IN WORDS</div>
+              <div style={{ flex:1, height:"1px", background:"rgba(110,229,105,.1)" }}/>
+            </div>
+
+            <textarea className="ta" rows={3} placeholder="e.g. yellow leaves on my cassava, chicken not eating, fish floating..." value={text} onChange={e=>setText(e.target.value)} style={{ marginBottom:12 }}/>
+
             <button className="pbtn" onClick={diagnose} disabled={loading||(!imageBase64&&!text.trim())}>
-              {loading ? <span className="pulse">Analysing...</span> : "🔬 Diagnose Now"}
+              {loading
+                ? <span style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}><span className="pulse">🔬</span> Analysing your farm...</span>
+                : <span>🔬 Diagnose Now</span>
+              }
             </button>
 
+            {/* Result card */}
             {result && (
-              <div className="card fi" style={{ marginTop:16 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
-                  <div>
-                    <div style={{ fontSize:15, fontWeight:800, color:"#4ade80", marginBottom:3 }}>{subjectEmoji(result.category||category, result.subject)} {result.disease}</div>
-                    {result.subject && <div style={{ fontSize:10, color:"#6b9e7e", fontFamily:"'Space Mono',monospace" }}>{result.subject}{result.confidence?` · ${result.confidence}`:""}</div>}
+              <div style={{ marginTop:16, background:"linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02))", border:`1px solid rgba(${result.severity==="severe"?"248,113,113":result.severity==="moderate"?"250,204,21":"110,229,105"},.3)`, borderRadius:20, padding:18, backdropFilter:"blur(8px)" }} className="fi">
+
+                {/* Disease header */}
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
+                  <div style={{ flex:1, marginRight:10 }}>
+                    <div style={{ fontSize:22, marginBottom:4 }}>{subjectEmoji(result.category||category, result.subject)}</div>
+                    <div style={{ fontSize:17, fontWeight:900, color:"#6ee569", letterSpacing:"-.02em", lineHeight:1.2, marginBottom:4 }}>{result.disease}</div>
+                    {result.subject && <div style={{ fontSize:11, color:"#3d6b4a", fontFamily:"'Space Mono',monospace" }}>{result.subject}{result.confidence ? ` · ${result.confidence} confidence` : ""}</div>}
                   </div>
-                  <span className="sbadge" style={{ background:`#${sevColor(result.severity)}22`, color:`#${sevColor(result.severity)}`, border:`1px solid #${sevColor(result.severity)}` }}>{result.severity}</span>
+                  <span className="sbadge" style={{
+                    background:`rgba(${result.severity==="severe"?"248,113,113":result.severity==="moderate"?"250,204,21":"110,229,105"},.12)`,
+                    color:`#${sevColor(result.severity)}`,
+                    border:`1px solid rgba(${result.severity==="severe"?"248,113,113":result.severity==="moderate"?"250,204,21":"110,229,105"},.4)`,
+                    fontSize:10, padding:"4px 10px"
+                  }}>{result.severity||"mild"}</span>
                 </div>
-                <p style={{ fontSize:13, color:"#b7e4c7", lineHeight:1.6, marginBottom:12 }}>{result.description}</p>
-                {result.treatment?.length>0&&<div style={{ marginBottom:10 }}>
-                  <div className="sectitle">💊 Treatment Steps</div>
-                  {result.treatment.map((s,i)=><div key={i} className="step"><div className="sn">{i+1}</div><div style={{ fontSize:12, color:"#b7e4c7", lineHeight:1.5 }}>{s}</div></div>)}
-                </div>}
-                {result.pesticide&&result.pesticide!=="N/A"&&<div style={{ background:"rgba(250,204,21,.07)", border:"1px solid rgba(250,204,21,.3)", borderRadius:9, padding:9, marginBottom:9 }}>
-                  <div className="sectitle">⚗️ RECOMMENDED PRODUCT</div>
-                  <div style={{ fontSize:12, color:"#fef08a" }}>{result.pesticide}</div>
-                </div>}
-                {result.disclaimer&&<div className="disclaimer">⚠️ {result.disclaimer}</div>}
-                {result.prevention&&<div style={{ fontSize:12, color:"#86efac", marginBottom:10, paddingTop:8, borderTop:"1px solid rgba(45,106,79,.2)" }}><span style={{ fontWeight:700 }}>🛡 Prevention: </span>{result.prevention}</div>}
-                <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-                  <button className="sbtn" onClick={speaking?()=>{window.speechSynthesis.cancel();setSpeaking(false);}:speak}>{speaking?"⏹ Stop":"🔊 Listen"}</button>
+
+                {/* Divider */}
+                <div style={{ height:"1px", background:"rgba(110,229,105,.1)", marginBottom:12 }}/>
+
+                {/* Description */}
+                <p style={{ fontSize:13, color:"#b7e4c7", lineHeight:1.65, marginBottom:14 }}>{result.description}</p>
+
+                {/* Treatment */}
+                {result.treatment?.length > 0 && (
+                  <div style={{ marginBottom:14 }}>
+                    <div className="sectitle" style={{ color:"#6ee569" }}>💊 Treatment Steps</div>
+                    {result.treatment.map((s,i)=>(
+                      <div key={i} className="step">
+                        <div className="sn">{i+1}</div>
+                        <div style={{ fontSize:12.5, color:"#b7e4c7", lineHeight:1.6, paddingTop:1 }}>{s}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Product */}
+                {result.pesticide && result.pesticide !== "N/A" && (
+                  <div style={{ background:"rgba(245,197,24,.06)", border:"1px solid rgba(245,197,24,.2)", borderRadius:12, padding:"10px 12px", marginBottom:12 }}>
+                    <div className="sectitle" style={{ color:"#f5c518", marginBottom:4 }}>⚗️ Recommended Product</div>
+                    <div style={{ fontSize:12.5, color:"#fef9c3", lineHeight:1.55 }}>{result.pesticide}</div>
+                  </div>
+                )}
+
+                {/* Disclaimer */}
+                {result.disclaimer && <div className="disclaimer">⚠️ {result.disclaimer}</div>}
+
+                {/* Prevention */}
+                {result.prevention && (
+                  <div style={{ fontSize:12.5, color:"#86efac", marginBottom:14, paddingTop:10, borderTop:"1px solid rgba(110,229,105,.1)", lineHeight:1.6 }}>
+                    <span style={{ fontWeight:700, color:"#6ee569" }}>🛡 Prevention: </span>{result.prevention}
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div style={{ display:"flex", gap:7, flexWrap:"wrap", paddingTop:4 }}>
+                  <button className="sbtn" onClick={speaking?()=>{window.speechSynthesis.cancel();setSpeaking(false);}:speak}>
+                    {speaking ? "⏹ Stop" : "🔊 Listen"}
+                  </button>
                   <button className="sbtn wa" onClick={shareWhatsApp}>📱 Share</button>
-                  <button className="sbtn" style={{ borderColor:"rgba(107,158,126,.35)", color:"#6b9e7e" }} onClick={()=>{ if(result&&location)setOutbreaks(p=>[{id:Date.now(),lat:location.lat+(Math.random()-.5)*.06,lng:location.lng+(Math.random()-.5)*.06,disease:result.disease,category:result.category||category,reports:1,date:new Date().toISOString().split("T")[0],state:"Your Area"},...p]); showToast("📍 Outbreak reported!"); }}>📍 Report</button>
-                  <button className="sbtn" style={{ borderColor:"rgba(107,158,126,.35)", color:"#6b9e7e" }} onClick={()=>{setResult(null);setImage(null);setImageBase64(null);setText("");}}>🔄 New</button>
+                  <button className="sbtn" style={{ color:"#60a5fa", borderColor:"rgba(96,165,250,.3)", background:"rgba(96,165,250,.06)" }}
+                    onClick={()=>{ if(result&&location) setOutbreaks(p=>[{id:Date.now(),lat:location.lat+(Math.random()-.5)*.06,lng:location.lng+(Math.random()-.5)*.06,disease:result.disease,category:result.category||category,reports:1,date:new Date().toISOString().split("T")[0],state:"Your Area"},...p]); showToast("📍 Outbreak reported!"); }}>
+                    📍 Report
+                  </button>
+                  <button className="sbtn" style={{ color:"#9ca3af", borderColor:"rgba(156,163,175,.2)", background:"transparent" }}
+                    onClick={()=>{setResult(null);setImage(null);setImageBase64(null);setText("");}}>
+                    🔄 New
+                  </button>
                 </div>
               </div>
             )}
 
-            {history.length>0&&!result&&(
-              <div style={{ marginTop:16 }}>
+            {/* History */}
+            {history.length > 0 && !result && (
+              <div style={{ marginTop:18 }}>
                 <div className="sectitle">Recent Diagnoses</div>
                 {history.slice(0,5).map((h,i)=>(
                   <div key={i} className="hi" onClick={()=>{ setResult(h); setImage(h.image||null); setCategory(h.category||"crops"); }}>
-                    {h.image?<img src={h.image} alt="" style={{ width:40,height:40,borderRadius:7,objectFit:"cover",flexShrink:0 }}/>:<div style={{ width:40,height:40,borderRadius:7,background:`#${CAT_COLORS[h.category||"crops"]}22`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>{subjectEmoji(h.category||"crops",h.subject)}</div>}
+                    {h.image
+                      ? <img src={h.image} alt="" style={{ width:44,height:44,borderRadius:10,objectFit:"cover",flexShrink:0 }}/>
+                      : <div style={{ width:44,height:44,borderRadius:10,background:`rgba(${CAT_COLORS[h.category||"crops"]?.match(/../g)?.map(x=>parseInt(x,16)).join(",")},0.15)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>{subjectEmoji(h.category||"crops",h.subject)}</div>
+                    }
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontWeight:700, color:"#4ade80", fontSize:12, marginBottom:1, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{h.disease}</div>
-                      <div style={{ fontSize:10, color:"#6b9e7e" }}>{h.subject} · {h.date}</div>
+                      <div style={{ fontWeight:700, color:"#6ee569", fontSize:13, marginBottom:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{h.disease}</div>
+                      <div style={{ fontSize:11, color:"#3d6b4a" }}>{h.subject} · {h.date}</div>
                     </div>
-                    <span className="sbadge" style={{ background:`#${sevColor(h.severity)}22`, color:`#${sevColor(h.severity)}`, fontSize:9 }}>{h.severity}</span>
+                    <span className="sbadge" style={{ background:`rgba(${sevColor(h.severity)==="4ade80"?"74,222,128":sevColor(h.severity)==="facc15"?"250,204,21":"248,113,113"},.12)`, color:`#${sevColor(h.severity)}`, fontSize:9 }}>{h.severity}</span>
                   </div>
                 ))}
               </div>
             )}
           </div>
         )}
-
         {/* ══ WEATHER TAB ══════════════════════════════════════════════════════ */}
         {tab==="weather" && (
           <div className="fi">
@@ -560,30 +754,29 @@ function AgroDocAI
             {weatherLoading&&<div style={{ textAlign:"center", color:"#6b9e7e", padding:20 }}><span className="pulse">🌤 Loading weather...</span></div>}
             {weather?.current_weather&&(
               <>
-                <div className="card" style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:36, marginBottom:4 }}>{WMO_CODES[weather.current_weather.weathercode]?.split(" ")[0]||"🌤"}</div>
-                  <div style={{ fontSize:32, fontWeight:800, color:"#4ade80" }}>{Math.round(weather.current_weather.temperature)}°C</div>
-                  <div style={{ fontSize:12, color:"#6b9e7e", marginTop:3 }}>{WMO_CODES[weather.current_weather.weathercode]||"Current weather"} · Wind {Math.round(weather.current_weather.windspeed)} km/h</div>
+                <div className="card" style={{ textAlign:"center", padding:24 }}>
+                  <div style={{ fontSize:48, marginBottom:8 }}>{WMO_CODES[weather.current_weather.weathercode]?.split(" ")[0]||"🌤"}</div>
+                  <div style={{ fontSize:36, fontWeight:900, color:"#6ee569", letterSpacing:"-.02em" }}>{Math.round(weather.current_weather.temperature)}°C</div>
+                  <div style={{ fontSize:12, color:"#5a8a65", marginTop:6 }}>{WMO_CODES[weather.current_weather.weathercode]||"Current weather"} · Wind {Math.round(weather.current_weather.windspeed)} km/h</div>
                 </div>
-                <div className="sectitle" style={{ marginTop:4 }}>7-Day Forecast</div>
-                <div style={{ display:"flex", gap:7, overflowX:"auto", paddingBottom:6, marginBottom:14 }}>
+                <div className="sectitle" style={{ marginTop:14 }}>7-Day Forecast</div>
+                <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:6, marginBottom:14 }}>
                   {(weather.daily?.time||[]).map((day,i)=>{
                     const code = weather.daily.weathercode[i];
                     const rain = weather.daily.precipitation_sum[i];
                     return(
-                      <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(45,106,79,.25)", borderRadius:10, padding:"9px 10px", textAlign:"center", minWidth:70, flexShrink:0 }}>
-                        <div style={{ fontSize:10, color:"#6b9e7e", marginBottom:4 }}>{new Date(day).toLocaleDateString("en",{weekday:"short"})}</div>
-                        <div style={{ fontSize:20 }}>{WMO_CODES[code]?.split(" ")[0]||"🌤"}</div>
-                        <div style={{ fontSize:12, fontWeight:700, color:"#4ade80", marginTop:3 }}>{Math.round(weather.daily.temperature_2m_max[i])}°</div>
-                        <div style={{ fontSize:10, color:"#6b9e7e" }}>{Math.round(weather.daily.temperature_2m_min[i])}°</div>
-                        {rain>0&&<div style={{ fontSize:9, color:"#60a5fa", marginTop:2 }}>{rain.toFixed(1)}mm</div>}
+                      <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(110,229,105,.12)", borderRadius:14, padding:"10px 10px", textAlign:"center", minWidth:68, flexShrink:0, transition:"all .2s" }}>
+                        <div style={{ fontSize:10, color:"#3d6b4a", marginBottom:5, fontWeight:600 }}>{new Date(day).toLocaleDateString("en",{weekday:"short"})}</div>
+                        <div style={{ fontSize:22 }}>{WMO_CODES[code]?.split(" ")[0]||"🌤"}</div>
+                        <div style={{ fontSize:13, fontWeight:800, color:"#6ee569", marginTop:4 }}>{Math.round(weather.daily.temperature_2m_max[i])}°</div>
+                        <div style={{ fontSize:10, color:"#3d6b4a" }}>{Math.round(weather.daily.temperature_2m_min[i])}°</div>
+                        {rain>0&&<div style={{ fontSize:9, color:"#60a5fa", marginTop:3, fontWeight:700 }}>💧{rain.toFixed(1)}mm</div>}
                       </div>
                     );
                   })}
                 </div>
               </>
             )}
-
             <div className="sectitle">Planting Calendar</div>
             <select className="inp" value={selectedCrop} onChange={e=>setSelectedCrop(e.target.value)} style={{ marginBottom:10 }}>
               {Object.keys(PLANTING_CALENDAR).map(c=><option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
@@ -591,16 +784,16 @@ function AgroDocAI
             {PLANTING_CALENDAR[selectedCrop]&&(
               <div className="card">
                 <div style={{ display:"flex", gap:10, marginBottom:10 }}>
-                  <div style={{ flex:1, background:"rgba(74,222,128,.07)", border:"1px solid rgba(74,222,128,.25)", borderRadius:9, padding:10 }}>
-                    <div className="sectitle">🌱 PLANT</div>
-                    <div style={{ fontSize:13, color:"#4ade80", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].plant.join(" · ")}</div>
+                  <div style={{ flex:1, background:"rgba(110,229,105,.06)", border:"1px solid rgba(110,229,105,.2)", borderRadius:12, padding:12 }}>
+                    <div className="sectitle" style={{ color:"#6ee569" }}>🌱 Plant</div>
+                    <div style={{ fontSize:13, color:"#6ee569", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].plant.join(" · ")}</div>
                   </div>
-                  <div style={{ flex:1, background:"rgba(250,204,21,.07)", border:"1px solid rgba(250,204,21,.25)", borderRadius:9, padding:10 }}>
-                    <div className="sectitle">🌾 HARVEST</div>
-                    <div style={{ fontSize:13, color:"#facc15", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].harvest.join(" · ")}</div>
+                  <div style={{ flex:1, background:"rgba(245,197,24,.06)", border:"1px solid rgba(245,197,24,.2)", borderRadius:12, padding:12 }}>
+                    <div className="sectitle" style={{ color:"#f5c518" }}>🌾 Harvest</div>
+                    <div style={{ fontSize:13, color:"#f5c518", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].harvest.join(" · ")}</div>
                   </div>
                 </div>
-                <div style={{ fontSize:12, color:"#86efac", lineHeight:1.55 }}>💡 {PLANTING_CALENDAR[selectedCrop].tips}</div>
+                <div style={{ fontSize:12.5, color:"#86efac", lineHeight:1.6 }}>💡 {PLANTING_CALENDAR[selectedCrop].tips}</div>
               </div>
             )}
           </div>
@@ -893,10 +1086,119 @@ function AgroDocAI
             </div>
           </div>
         )}
-      </div>
+        {/* ══ SETTINGS TAB ══════════════════════════════════════════════════════ */}
+        {tab==="settings" && (
+          <div className="fi">
 
-      {/* BOTTOM NAV */}
-      <nav className="bnav">
+            {/* Push Notifications */}
+            <div className="sectitle">🔔 Disease Outbreak Alerts</div>
+            <div className="card" style={{ marginBottom:14 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:14, marginBottom:4 }}>Outbreak Notifications</div>
+                  <div style={{ fontSize:12, color:"#3d6b4a", lineHeight:1.55 }}>Get alerts when disease outbreaks are reported near your farm. Be warned before it reaches you.</div>
+                </div>
+                <div style={{ width:44, height:24, background:notifEnabled?"rgba(110,229,105,.3)":"rgba(255,255,255,.08)", border:`1px solid ${notifEnabled?"rgba(110,229,105,.5)":"rgba(255,255,255,.1)"}`, borderRadius:12, cursor:"pointer", position:"relative", flexShrink:0, marginLeft:10 }}
+                  onClick={notifEnabled ? ()=>setNotifEnabled(false) : enableNotifications}>
+                  <div style={{ width:18, height:18, borderRadius:"50%", background:notifEnabled?"#6ee569":"#3d6b4a", position:"absolute", top:2, left:notifEnabled?22:2, transition:"left .2s" }}/>
+                </div>
+              </div>
+              {!notifEnabled && (
+                <button className="pbtn" onClick={enableNotifications} style={{ fontSize:13, padding:"10px" }}>
+                  🔔 Enable Outbreak Alerts
+                </button>
+              )}
+              {notifEnabled && (
+                <div style={{ background:"rgba(110,229,105,.06)", border:"1px solid rgba(110,229,105,.2)", borderRadius:10, padding:"8px 12px", fontSize:12, color:"#86efac" }}>
+                  ✅ Alerts are ON — you will be notified of outbreaks near your farm
+                </div>
+              )}
+            </div>
+
+            {/* Price Alerts */}
+            <div className="sectitle">💰 Market Price Alerts</div>
+            <div style={{ fontSize:12, color:"#3d6b4a", marginBottom:10, lineHeight:1.55 }}>Set a price target and get notified when the market hits it. Never miss the right time to buy or sell.</div>
+
+            {priceAlerts.length > 0 && priceAlerts.map(a => (
+              <div key={a.id} style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(110,229,105,.15)", borderRadius:12, padding:"12px 14px", marginBottom:8, display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontWeight:700, fontSize:13, color:"#6ee569" }}>{a.crop}</div>
+                  <div style={{ fontSize:12, color:"#3d6b4a" }}>Alert when price goes {a.direction} ₦{Number(a.threshold).toLocaleString()}</div>
+                </div>
+                <button onClick={()=>deleteAlert(a.id)} style={{ background:"rgba(248,113,113,.1)", border:"1px solid rgba(248,113,113,.25)", color:"#f87171", borderRadius:8, padding:"4px 10px", fontSize:11, cursor:"pointer", fontWeight:700 }}>Remove</button>
+              </div>
+            ))}
+
+            {showAlertForm ? (
+              <div className="card fi" style={{ marginBottom:12 }}>
+                <div className="sectitle" style={{ marginBottom:10 }}>New Price Alert</div>
+                <div style={{ marginBottom:8 }}>
+                  <div style={{ fontSize:11, color:"#3d6b4a", marginBottom:4, fontWeight:700 }}>Commodity</div>
+                  <select className="inp" value={alertForm.crop} onChange={e=>setAlertForm(p=>({...p,crop:e.target.value}))}>
+                    {MARKET_PRICES.map(m=><option key={m.crop} value={m.crop}>{m.crop}</option>)}
+                  </select>
+                </div>
+                <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:11, color:"#3d6b4a", marginBottom:4, fontWeight:700 }}>Alert when price goes</div>
+                    <select className="inp" value={alertForm.direction} onChange={e=>setAlertForm(p=>({...p,direction:e.target.value}))}>
+                      <option value="below">Below (good time to buy)</option>
+                      <option value="above">Above (good time to sell)</option>
+                    </select>
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:11, color:"#3d6b4a", marginBottom:4, fontWeight:700 }}>Target Price (₦)</div>
+                    <input className="inp" type="number" value={alertForm.threshold} onChange={e=>setAlertForm(p=>({...p,threshold:Number(e.target.value)}))} placeholder="e.g. 30000"/>
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button className="pbtn" style={{ flex:1, fontSize:13, padding:"10px" }} onClick={saveAlert}>Save Alert</button>
+                  <button className="sbtn" onClick={()=>setShowAlertForm(false)}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <button className="sbtn" style={{ width:"100%", justifyContent:"center", padding:"11px", marginBottom:16 }} onClick={()=>setShowAlertForm(true)}>
+                + Add Price Alert
+              </button>
+            )}
+
+            {/* App Info */}
+            <div className="sectitle">ℹ️ About AgroDoc AI</div>
+            <div className="card">
+              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+                <div style={{ width:48, height:48, borderRadius:14, background:"linear-gradient(135deg,#164024,#2d8a50)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:24 }}>🌿</div>
+                <div>
+                  <div style={{ fontWeight:800, fontSize:15, color:"#6ee569" }}>AgroDoc AI</div>
+                  <div style={{ fontSize:11, color:"#3d6b4a" }}>Version 4.0 · Cache 2026.05.v4</div>
+                </div>
+              </div>
+              {[
+                ["Founder", "Adegbegi Martins Maxwell"],
+                ["Email", "adegbegimartinsmaxwell@gmail.com"],
+                ["Website", "agrodoc-ai.vercel.app"],
+                ["Diseases Covered", "30 diseases across 4 sectors"],
+                ["Languages", "English, Pidgin, Hausa, Yoruba, Igbo"],
+                ["Data Protection", "NDPR 2019 Compliant"],
+              ].map(([k,v])=>(
+                <div key={k} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0", borderBottom:"1px solid rgba(110,229,105,.06)", fontSize:12 }}>
+                  <span style={{ color:"#3d6b4a", fontWeight:600 }}>{k}</span>
+                  <span style={{ color:"#b7e4c7", textAlign:"right", maxWidth:"60%" }}>{v}</span>
+                </div>
+              ))}
+              <div style={{ marginTop:12 }}>
+                <a href="https://agrodoc-ai.vercel.app" target="_blank" rel="noreferrer" style={{ fontSize:12, color:"#6ee569", textDecoration:"none", display:"block", marginBottom:6 }}>🌐 Open Web App</a>
+                <a href="mailto:adegbegimartinsmaxwell@gmail.com" style={{ fontSize:12, color:"#60a5fa", textDecoration:"none" }}>📬 Contact the Founder</a>
+              </div>
+            </div>
+
+            {/* Clear Data */}
+            <div className="sectitle" style={{ marginTop:14 }}>🗑 Data</div>
+            <button onClick={()=>{ if(window.confirm("Clear all history and journal entries?")){localStorage.clear();window.location.reload();} }} style={{ background:"rgba(248,113,113,.08)", border:"1px solid rgba(248,113,113,.2)", color:"#f87171", width:"100%", padding:"11px", borderRadius:12, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"'Outfit',sans-serif" }}>
+              Clear All Local Data
+            </button>
+
+          </div>
+        )}
         {tabs.map(tb=>(
           <button key={tb.id} className={`ntab ${tab===tb.id?"on":""}`} onClick={()=>setTab(tb.id)}>
             <span>{tb.icon}</span>{tb.label}
