@@ -2,50 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#050e07"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#07130a"/>
 <title>AgroDoc AI — Your AI Farm Doctor</title>
-<meta name="description" content="Nigeria AI farm doctor. Diagnose crop, poultry, fish and livestock diseases in seconds. Free for farmers. Available in Pidgin, Hausa, Yoruba, Igbo and English."/>
-<!-- Open Graph for WhatsApp sharing -->
-<meta property="og:title" content="AgroDoc AI — Your AI Farm Doctor"/>
-<meta property="og:description" content="Diagnose farm diseases in 10 seconds. Free for Nigerian farmers. Works in Pidgin, Hausa, Yoruba, Igbo and English."/>
-<meta property="og:type" content="website"/>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #07130a; -webkit-tap-highlight-color: transparent; }
-  #root { min-height: 100vh; }
-  #loading {
-    position: fixed; inset: 0; background: #07130a;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    z-index: 9999; gap: 16px;
-  }
-  #loading .logo { font-size: 48px; }
-  #loading .name { font-size: 24px; font-weight: 800; color: #4ade80; font-family: sans-serif; }
-  #loading .sub { font-size: 13px; color: #6b9e7e; font-family: sans-serif; }
-  #loading .bar {
-    width: 120px; height: 3px; background: #1a5c36; border-radius: 3px; overflow: hidden;
-  }
-  #loading .fill {
-    height: 100%; background: #4ade80; border-radius: 3px;
-    animation: load 2s ease forwards;
-  }
-  @keyframes load { from { width: 0 } to { width: 100% } }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050e07}
+#root{min-height:100vh}
+#ld{position:fixed;inset:0;background:#050e07;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:9999}
+.lic{font-size:52px;animation:lp 1.5s ease-in-out infinite}
+@keyframes lp{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.lnm{font-size:22px;font-weight:900;color:#6ee569;font-family:sans-serif;letter-spacing:-.02em}
+.lsb{font-size:12px;color:#3d6b4a;font-family:sans-serif}
+.lbr{width:120px;height:3px;background:#0a2010;border-radius:3px;overflow:hidden;margin-top:4px}
+.lbf{height:100%;background:linear-gradient(90deg,#6ee569,#a8ff6b);border-radius:3px;animation:bl 1.5s ease forwards}
+@keyframes bl{from{width:0}to{width:100%}}
 </style>
 </head>
 <body>
-<!-- Loading screen shown while React loads -->
-<div id="loading">
-  <div class="logo">🌿</div>
-  <div class="name">AgroDoc AI</div>
-  <div class="sub">Your AI Farm Doctor</div>
-  <div class="bar"><div class="fill"></div></div>
+<div id="ld">
+  <div class="lic">🌿</div>
+  <div class="lnm">AgroDoc AI</div>
+  <div class="lsb">Your AI Farm Doctor</div>
+  <div class="lbr"><div class="lbf"></div></div>
 </div>
 <div id="root"></div>
 <script type="text/babel" data-presets="react">
@@ -54,8 +38,8 @@ const { useState, useRef, useEffect, useCallback } = React;
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIGURATION — UPDATE BOTH VALUES AFTER YOU DEPLOY ON RENDER
 // ─────────────────────────────────────────────────────────────────────────────
-// YOUR RENDER BACKEND URL — already set
-const BACKEND_URL = "https://agrodoc-ai.onrender.com";
+// Step 1: Replace with your actual Render URL after deployment
+const BACKEND_URL = "https://agrodoc-ai.onrender.com"; // ← CHANGE THIS
 
 // Step 2: Must match APP_KEY in your backend .env file exactly
 // This is the shared secret that locks your API — never share it publicly
@@ -186,14 +170,17 @@ function AgroDocAI() {
   const [lang, setLang] = useState("en");
   const [mode, setMode] = useState("farmer");
   const [tab, setTab] = useState("diagnose");
-  // Fix #2 — ToS acceptance modal
   const [tosAccepted, setTosAccepted] = useState(() => localStorage.getItem("agrodoc_tos") === "yes");
-  // Fix #3 — Registration
   const [showRegister, setShowRegister] = useState(false);
   const [regForm, setRegForm] = useState({ name:"", phone:"", state:"" });
   const [registered, setRegistered] = useState(() => !!localStorage.getItem("agrodoc_uid"));
-  // Fix #5 — Feedback
   const [showFeedback, setShowFeedback] = useState(false);
+  // Push notifications
+  const [notifEnabled, setNotifEnabled] = useState(false);
+  // Price alerts
+  const [priceAlerts, setPriceAlerts] = useState(() => { try { return JSON.parse(localStorage.getItem("agrodoc_alerts")||"[]"); } catch { return []; } });
+  const [showAlertForm, setShowAlertForm] = useState(false);
+  const [alertForm, setAlertForm] = useState({ crop:"Maize", threshold:30000, direction:"below" });
   // Fix #6 — Market price timestamp
   const [priceUpdated] = useState(new Date().toLocaleString("en-NG", { dateStyle:"medium", timeStyle:"short" }));
   const [category, setCategory] = useState("crops");
@@ -235,6 +222,56 @@ function AgroDocAI() {
   const cameraRef = useRef();
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+
+  // ── SERVICE WORKER + PUSH NOTIFICATIONS ─────────────────────────────────────
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    }
+    if (Notification.permission === 'granted') setNotifEnabled(true);
+  }, []);
+
+  const enableNotifications = async () => {
+    if (!('Notification' in window)) { showToast("⚠️ Notifications not supported on this browser"); return; }
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      setNotifEnabled(true);
+      showToast("✅ Disease outbreak alerts enabled!");
+      new Notification("🌿 AgroDoc AI", { body:"You will now receive disease outbreak alerts for your area." });
+    } else {
+      showToast("❌ Notification permission denied");
+    }
+  };
+
+  // ── PRICE ALERTS ─────────────────────────────────────────────────────────────
+  const saveAlert = () => {
+    const newAlerts = [...priceAlerts, { ...alertForm, id: Date.now(), active: true }];
+    setPriceAlerts(newAlerts);
+    localStorage.setItem("agrodoc_alerts", JSON.stringify(newAlerts));
+    setShowAlertForm(false);
+    showToast("✅ Price alert saved!");
+  };
+  const deleteAlert = (id) => {
+    const updated = priceAlerts.filter(a => a.id !== id);
+    setPriceAlerts(updated);
+    localStorage.setItem("agrodoc_alerts", JSON.stringify(updated));
+    showToast("🗑 Alert removed");
+  };
+
+  // Check price alerts against market data
+  useEffect(() => {
+    if (priceAlerts.length === 0 || !notifEnabled) return;
+    priceAlerts.forEach(alert => {
+      const marketItem = MARKET_PRICES.find(m => m.crop.toLowerCase().includes(alert.crop.toLowerCase()));
+      if (!marketItem) return;
+      const triggered = alert.direction === 'below' ? marketItem.price < alert.threshold : marketItem.price > alert.threshold;
+      if (triggered && Notification.permission === 'granted') {
+        new Notification(`💰 Price Alert — ${alert.crop}`, {
+          body: `${alert.crop} is now ₦${marketItem.price.toLocaleString()} — ${alert.direction} your target of ₦${alert.threshold.toLocaleString()}`
+        });
+      }
+    });
+  }, [priceAlerts, notifEnabled]);
 
   // Fetch approved directory listings from backend
   const fetchDirectory = useCallback(async (type="") => {
@@ -463,172 +500,287 @@ function AgroDocAI() {
     { id:"market",   icon:"💰", label:"Market"   },
     { id:"journal",  icon:"📒", label:"Journal"  },
     { id:"find",     icon:"📍", label:"Find"     },
+    { id:"settings", icon:"⚙️", label:"Settings" },
   ];
 
   return (
-    <div style={{ fontFamily:"'Outfit',sans-serif", minHeight:"100vh", background:"linear-gradient(160deg,#07130a 0%,#0d2818 55%,#071a10 100%)", color:"#e8f5e9", paddingBottom:70 }}>
+    <div style={{ fontFamily:"'Outfit',sans-serif", minHeight:"100vh", background:"linear-gradient(160deg,#050e07 0%,#0a1f10 50%,#060d08 100%)", color:"#e8f5e9", paddingBottom:80 }}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
       <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}
-        ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#2d6a4f}
-        .lb{background:transparent;border:1px solid #2d6a4f;color:#a7f3d0;padding:3px 8px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;transition:all .2s}
-        .lb.on{background:#2d6a4f;color:#fff}
-        .uz{border:2px dashed #2d6a4f;border-radius:14px;padding:22px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(45,106,79,.07)}
-        .uz:hover{border-color:#4ade80;background:rgba(74,222,128,.08)}
-        .pbtn{background:linear-gradient(135deg,#16a34a,#4ade80);color:#0a1a0f;border:none;padding:13px;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer;width:100%;font-family:'Outfit',sans-serif;transition:all .2s}
-        .pbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,222,128,.35)}
-        .pbtn:disabled{opacity:.45;cursor:not-allowed}
-        .sbtn{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.35);color:#4ade80;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:4px}
-        .sbtn:hover{background:rgba(74,222,128,.18)}
-        .sbtn.wa{border-color:rgba(37,211,102,.45);color:#25d366;background:rgba(37,211,102,.07)}
-        .card{background:rgba(255,255,255,.04);border:1px solid rgba(45,106,79,.3);border-radius:14px;padding:15px;margin-bottom:12px}
-        .ta{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(45,106,79,.4);border-radius:10px;padding:11px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:14px;resize:none;outline:none}
-        .ta:focus{border-color:#4ade80}
-        .inp{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(45,106,79,.4);border-radius:10px;padding:10px 12px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:13px;outline:none}
-        .inp:focus{border-color:#4ade80}
-        .catbtn{flex:1;padding:8px 4px;border:1px solid rgba(45,106,79,.3);background:transparent;color:#6b9e7e;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;transition:all .2s;text-align:center}
-        .catbtn.on{color:#0a1a0f;border-color:transparent}
-        .mt{display:flex;background:rgba(255,255,255,.04);border-radius:10px;padding:3px;border:1px solid rgba(45,106,79,.3)}
-        .mb{flex:1;padding:6px;border:none;background:transparent;color:#6b9e7e;border-radius:7px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s}
-        .mb.on{background:#2d6a4f;color:#fff}
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+        ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#1a5c36}
+
+        /* Language buttons */
+        .lb{background:transparent;border:1px solid rgba(110,229,105,.2);color:#7EB88A;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;transition:all .2s}
+        .lb.on{background:linear-gradient(135deg,#1a5c36,#2d8a50);color:#a8ffb0;border-color:transparent;box-shadow:0 2px 12px rgba(110,229,105,.2)}
+
+        /* Upload zone */
+        .uz{border:1.5px dashed rgba(110,229,105,.25);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(110,229,105,.03)}
+        .uz:hover{border-color:rgba(110,229,105,.5);background:rgba(110,229,105,.06)}
+
+        /* Primary button */
+        .pbtn{background:linear-gradient(135deg,#15803d,#22c55e,#6ee569);color:#071209;border:none;padding:14px;border-radius:14px;font-weight:900;font-size:15px;cursor:pointer;width:100%;font-family:'Outfit',sans-serif;transition:all .25s;letter-spacing:-.01em;box-shadow:0 4px 20px rgba(110,229,105,.2)}
+        .pbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 32px rgba(110,229,105,.35)}
+        .pbtn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+        /* Secondary button */
+        .sbtn{background:rgba(110,229,105,.06);border:1px solid rgba(110,229,105,.25);color:#6ee569;padding:8px 14px;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:5px}
+        .sbtn:hover{background:rgba(110,229,105,.14);border-color:rgba(110,229,105,.5)}
+        .sbtn.wa{border-color:rgba(37,211,102,.3);color:#25d366;background:rgba(37,211,102,.05)}
+        .sbtn.wa:hover{background:rgba(37,211,102,.12)}
+
+        /* Card */
+        .card{background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(110,229,105,.15);border-radius:18px;padding:16px;margin-bottom:12px;backdrop-filter:blur(4px)}
+
+        /* Textarea */
+        .ta{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(110,229,105,.2);border-radius:12px;padding:12px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:14px;resize:none;outline:none;transition:border-color .2s}
+        .ta:focus{border-color:rgba(110,229,105,.6);background:rgba(110,229,105,.03)}
+
+        /* Input */
+        .inp{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(110,229,105,.2);border-radius:12px;padding:11px 14px;color:#e8f5e9;font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+        .inp:focus{border-color:rgba(110,229,105,.6)}
+
+        /* Category buttons */
+        .catbtn{flex:1;padding:10px 4px;border:1.5px solid rgba(110,229,105,.15);background:rgba(255,255,255,.03);color:#5a8a65;border-radius:14px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;transition:all .25s;text-align:center;line-height:1.4}
+        .catbtn:hover{border-color:rgba(110,229,105,.35);background:rgba(110,229,105,.06)}
+        .catbtn.on{color:#071209;border-color:transparent;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+
+        /* Mode toggle */
+        .mt{display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:3px;border:1px solid rgba(110,229,105,.15)}
+        .mb{flex:1;padding:7px;border:none;background:transparent;color:#5a8a65;border-radius:9px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s}
+        .mb.on{background:linear-gradient(135deg,#1a5c36,#2d8a50);color:#a8ffb0;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+
+        /* Animations */
         .pulse{animation:pulse 1.4s infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-        .step{display:flex;gap:9px;align-items:flex-start;margin-bottom:7px}
-        .sn{background:#2d6a4f;color:#4ade80;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
-        .hi{display:flex;gap:9px;align-items:center;padding:10px;background:rgba(255,255,255,.02);border:1px solid rgba(45,106,79,.2);border-radius:11px;margin-bottom:8px;cursor:pointer;transition:all .2s}
-        .hi:hover{background:rgba(45,106,79,.15)}
-        .sbadge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
-        @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        .fi{animation:fi .3s ease forwards}
-        .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#166534;color:#dcfce7;padding:9px 20px;border-radius:20px;font-weight:700;font-size:13px;z-index:999;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.4);animation:fi .25s ease}
-        .bnav{position:fixed;bottom:0;left:0;right:0;background:#0d2818;border-top:1px solid rgba(45,106,79,.4);display:flex;max-width:480px;margin:0 auto;z-index:100}
-        .ntab{flex:1;padding:10px 4px 8px;border:none;background:transparent;color:#4b7a5e;cursor:pointer;font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;text-align:center;transition:all .2s}
-        .ntab.on{color:#4ade80}
-        .ntab span{display:block;font-size:19px;margin-bottom:2px}
-        .disclaimer{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.35);border-radius:9px;padding:9px;margin-bottom:9px;font-size:12px;color:#fca5a5}
-        .sectitle{font-size:10px;color:#4b7a5e;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-family:'Space Mono',monospace}
-        .popup{background:#0d2818;border:1px solid rgba(45,106,79,.5);border-radius:11px;padding:12px;margin-top:9px}
-        select.inp option{background:#0d2818;color:#e8f5e9}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+        .spin{animation:spin 1s linear infinite}
+        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+        /* Step */
+        .step{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+        .sn{background:linear-gradient(135deg,#1a5c36,#2d8a50);color:#a8ffb0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+        /* History item */
+        .hi{display:flex;gap:10px;align-items:center;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(110,229,105,.12);border-radius:14px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+        .hi:hover{background:rgba(110,229,105,.07);border-color:rgba(110,229,105,.3);transform:translateX(2px)}
+
+        /* Badge */
+        .sbadge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+
+        /* Fade in */
+        @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .fi{animation:fi .35s ease forwards}
+
+        /* Toast */
+        .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#14532d,#166534);color:#bbf7d0;padding:10px 22px;border-radius:24px;font-weight:700;font-size:13px;z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:fi .25s ease;border:1px solid rgba(110,229,105,.3)}
+
+        /* Bottom nav */
+        .bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(5,14,7,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(110,229,105,.12);display:flex;max-width:480px;margin:0 auto;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+        .ntab{flex:1;padding:10px 4px 9px;border:none;background:transparent;color:#3d6b4a;cursor:pointer;font-family:'Outfit',sans-serif;font-size:9.5px;font-weight:700;text-align:center;transition:all .2s;position:relative}
+        .ntab.on{color:#6ee569}
+        .ntab.on::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:20px;height:2.5px;background:linear-gradient(90deg,#6ee569,#a8ff6b);border-radius:2px}
+        .ntab span{display:block;font-size:20px;margin-bottom:3px}
+
+        /* Disclaimer */
+        .disclaimer{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#fca5a5;line-height:1.5}
+
+        /* Section title */
+        .sectitle{font-size:10px;color:#3d6b4a;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-family:'Space Mono',monospace}
+
+        /* Popup */
+        .popup{background:linear-gradient(135deg,rgba(10,31,16,.95),rgba(5,14,7,.95));border:1px solid rgba(110,229,105,.25);border-radius:14px;padding:14px;margin-top:10px;backdrop-filter:blur(8px)}
+
+        select.inp option{background:#0a1f10;color:#e8f5e9}
       `}</style>
 
       {toast && <div className="toast">{toast}</div>}
 
-      {/* HEADER */}
-      <div style={{ padding:"13px 15px 0", maxWidth:480, margin:"0 auto" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:9 }}>
-          <div>
-            <div style={{ fontSize:19, fontWeight:900, color:"#4ade80", letterSpacing:"-0.02em" }}>🌿 AgroDoc AI</div>
-            <div style={{ fontSize:10, color:"#6b9e7e", fontFamily:"'Space Mono',monospace" }}>Your AI Farm Doctor</div>
+      {/* ── HEADER ─────────────────────────────────────────────────────────────── */}
+      <div style={{ background:"linear-gradient(180deg,rgba(10,31,16,.98) 0%,transparent 100%)", padding:"14px 16px 12px", maxWidth:480, margin:"0 auto", position:"sticky", top:0, zIndex:50, backdropFilter:"blur(16px)", borderBottom:"1px solid rgba(110,229,105,.08)" }}>
+        {/* Top row */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:9 }}>
+            <div style={{ width:36, height:36, borderRadius:11, background:"linear-gradient(135deg,#164024,#2d8a50)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, boxShadow:"0 4px 12px rgba(110,229,105,.2)" }}>🌿</div>
+            <div>
+              <div style={{ fontSize:17, fontWeight:900, color:"#6ee569", letterSpacing:"-.02em", lineHeight:1.1 }}>AgroDoc AI</div>
+              <div style={{ fontSize:9, color:"#3d6b4a", fontFamily:"'Space Mono',monospace", letterSpacing:".05em" }}>YOUR AI FARM DOCTOR</div>
+            </div>
           </div>
-          <div style={{ display:"flex", gap:3, flexWrap:"wrap", justifyContent:"flex-end", maxWidth:215 }}>
+          <div style={{ display:"flex", gap:3, flexWrap:"wrap", justifyContent:"flex-end", maxWidth:200 }}>
             {Object.entries(LANGUAGES).map(([k,v])=>(
               <button key={k} className={`lb ${lang===k?"on":""}`} onClick={()=>setLang(k)}>{v.label}</button>
             ))}
           </div>
         </div>
-        {isOffline && <div style={{ background:"rgba(251,146,60,.1)", border:"1px solid rgba(251,146,60,.4)", borderRadius:8, padding:"6px 11px", fontSize:11, color:"#fb923c", marginBottom:9 }}>📵 Offline — cached results available</div>}
-        <div className="mt" style={{ marginBottom:13 }}>
-          <button className={`mb ${mode==="farmer"?"on":""}`} onClick={()=>setMode("farmer")}>🌾 Farmer</button>
-          <button className={`mb ${mode==="dealer"?"on":""}`} onClick={()=>setMode("dealer")}>🏪 Dealer/Vet</button>
+
+        {isOffline && <div style={{ background:"rgba(251,146,60,.08)", border:"1px solid rgba(251,146,60,.3)", borderRadius:10, padding:"6px 12px", fontSize:11, color:"#fb923c", marginBottom:8, display:"flex", alignItems:"center", gap:6 }}>📵 <span>Offline mode — cached results available</span></div>}
+
+        {/* Mode toggle */}
+        <div className="mt">
+          <button className={`mb ${mode==="farmer"?"on":""}`} onClick={()=>setMode("farmer")}>🌾 Farmer Mode</button>
+          <button className={`mb ${mode==="dealer"?"on":""}`} onClick={()=>setMode("dealer")}>🏪 Dealer / Vet</button>
         </div>
       </div>
 
       {/* CONTENT */}
-      <div style={{ padding:"0 15px", maxWidth:480, margin:"0 auto" }}>
+      <div style={{ padding:"12px 14px 0", maxWidth:480, margin:"0 auto" }}>
 
         {/* ══ DIAGNOSE TAB ══════════════════════════════════════════════════════ */}
         {tab==="diagnose" && (
           <div className="fi">
+            {/* Category selector */}
             <div className="sectitle">What are you diagnosing?</div>
-            <div style={{ display:"flex", gap:6, marginBottom:13 }}>
+            <div style={{ display:"flex", gap:8, marginBottom:14 }}>
               {CATEGORIES.map(c=>(
                 <button key={c.id} className={`catbtn ${category===c.id?"on":""}`}
-                  style={category===c.id?{ background:`#${CAT_COLORS[c.id]}`, color:"#0a1a0f" }:{}}
+                  style={category===c.id ? {
+                    background:`linear-gradient(135deg,#${CAT_COLORS[c.id]}cc,#${CAT_COLORS[c.id]})`,
+                    color:"#071209", fontWeight:800
+                  } : {}}
                   onClick={()=>{ setCategory(c.id); setResult(null); }}>
-                  {c.emoji}<br/><span style={{ fontSize:10 }}>{c.label}</span>
+                  <div style={{ fontSize:20, marginBottom:3 }}>{c.emoji}</div>
+                  <div style={{ fontSize:10 }}>{c.label}</div>
                 </button>
               ))}
             </div>
 
-            {/* Camera snap + gallery upload */}
-            <div style={{ marginBottom:11 }}>
+            {/* Photo upload */}
+            <div style={{ marginBottom:12 }}>
               {image ? (
-                <div style={{ position:"relative" }}>
-                  <img src={image} alt="subject" style={{ width:"100%", maxHeight:200, objectFit:"cover", borderRadius:12 }}/>
-                  <button onClick={()=>{setImage(null);setImageBase64(null);}} style={{ position:"absolute", top:8, right:8, background:"rgba(0,0,0,.6)", border:"none", color:"#fff", borderRadius:"50%", width:28, height:28, fontSize:14, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+                <div style={{ position:"relative", borderRadius:16, overflow:"hidden", boxShadow:"0 8px 32px rgba(0,0,0,.4)" }}>
+                  <img src={image} alt="subject" style={{ width:"100%", maxHeight:210, objectFit:"cover", display:"block" }}/>
+                  <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(0,0,0,.5),transparent)" }}/>
+                  <button onClick={()=>{setImage(null);setImageBase64(null);}} style={{ position:"absolute", top:10, right:10, background:"rgba(0,0,0,.6)", backdropFilter:"blur(8px)", border:"1px solid rgba(255,255,255,.2)", color:"#fff", borderRadius:"50%", width:30, height:30, fontSize:13, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+                  <div style={{ position:"absolute", bottom:10, left:12, fontSize:12, color:"rgba(255,255,255,.8)", fontWeight:600 }}>📷 Photo ready — tap Diagnose</div>
                 </div>
               ) : (
                 <div style={{ display:"flex", gap:8 }}>
-                  {/* Snap with camera */}
-                  <div className="uz" onClick={()=>cameraRef.current.click()} style={{ flex:1, padding:"18px 10px" }}>
-                    <div style={{ fontSize:28, marginBottom:4 }}>📸</div>
-                    <div style={{ color:"#a7f3d0", fontWeight:700, fontSize:12 }}>Take Photo</div>
-                    <div style={{ fontSize:10, color:"#4b7a5e", marginTop:2 }}>Snap directly</div>
+                  <div className="uz" onClick={()=>cameraRef.current.click()} style={{ flex:1, padding:"16px 8px", borderRadius:14 }}>
+                    <div style={{ fontSize:26, marginBottom:5 }}>📸</div>
+                    <div style={{ color:"#6ee569", fontWeight:700, fontSize:12 }}>Take Photo</div>
+                    <div style={{ fontSize:10, color:"#3d6b4a", marginTop:2 }}>Open camera</div>
                     <input ref={cameraRef} type="file" accept="image/*" capture="environment" style={{ display:"none" }} onChange={e=>handleFile(e.target.files[0])}/>
                   </div>
-                  {/* Upload from gallery */}
-                  <div className="uz" onClick={()=>fileRef.current.click()} style={{ flex:1, padding:"18px 10px" }}>
-                    <div style={{ fontSize:28, marginBottom:4 }}>🖼️</div>
-                    <div style={{ color:"#a7f3d0", fontWeight:700, fontSize:12 }}>From Gallery</div>
-                    <div style={{ fontSize:10, color:"#4b7a5e", marginTop:2 }}>Choose photo</div>
+                  <div className="uz" onClick={()=>fileRef.current.click()} style={{ flex:1, padding:"16px 8px", borderRadius:14 }}>
+                    <div style={{ fontSize:26, marginBottom:5 }}>🖼️</div>
+                    <div style={{ color:"#6ee569", fontWeight:700, fontSize:12 }}>Gallery</div>
+                    <div style={{ fontSize:10, color:"#3d6b4a", marginTop:2 }}>Choose photo</div>
                     <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={e=>handleFile(e.target.files[0])}/>
                   </div>
                 </div>
               )}
             </div>
-            <div style={{ textAlign:"center", color:"#4b7a5e", fontSize:10, marginBottom:8, fontFamily:"'Space Mono',monospace" }}>— or describe symptoms —</div>
-            <textarea className="ta" rows={3} placeholder="Describe what you see..." value={text} onChange={e=>setText(e.target.value)} style={{ marginBottom:12 }}/>
+
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+              <div style={{ flex:1, height:"1px", background:"rgba(110,229,105,.1)" }}/>
+              <div style={{ fontSize:10, color:"#3d6b4a", fontWeight:600 }}>OR DESCRIBE IN WORDS</div>
+              <div style={{ flex:1, height:"1px", background:"rgba(110,229,105,.1)" }}/>
+            </div>
+
+            <textarea className="ta" rows={3} placeholder="e.g. yellow leaves on my cassava, chicken not eating, fish floating..." value={text} onChange={e=>setText(e.target.value)} style={{ marginBottom:12 }}/>
+
             <button className="pbtn" onClick={diagnose} disabled={loading||(!imageBase64&&!text.trim())}>
-              {loading ? <span className="pulse">Analysing...</span> : "🔬 Diagnose Now"}
+              {loading
+                ? <span style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}><span className="pulse">🔬</span> Analysing your farm...</span>
+                : <span>🔬 Diagnose Now</span>
+              }
             </button>
 
+            {/* Result card */}
             {result && (
-              <div className="card fi" style={{ marginTop:16 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
-                  <div>
-                    <div style={{ fontSize:15, fontWeight:800, color:"#4ade80", marginBottom:3 }}>{subjectEmoji(result.category||category, result.subject)} {result.disease}</div>
-                    {result.subject && <div style={{ fontSize:10, color:"#6b9e7e", fontFamily:"'Space Mono',monospace" }}>{result.subject}{result.confidence?` · ${result.confidence}`:""}</div>}
+              <div style={{ marginTop:16, background:"linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02))", border:`1px solid rgba(${result.severity==="severe"?"248,113,113":result.severity==="moderate"?"250,204,21":"110,229,105"},.3)`, borderRadius:20, padding:18, backdropFilter:"blur(8px)" }} className="fi">
+
+                {/* Disease header */}
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
+                  <div style={{ flex:1, marginRight:10 }}>
+                    <div style={{ fontSize:22, marginBottom:4 }}>{subjectEmoji(result.category||category, result.subject)}</div>
+                    <div style={{ fontSize:17, fontWeight:900, color:"#6ee569", letterSpacing:"-.02em", lineHeight:1.2, marginBottom:4 }}>{result.disease}</div>
+                    {result.subject && <div style={{ fontSize:11, color:"#3d6b4a", fontFamily:"'Space Mono',monospace" }}>{result.subject}{result.confidence ? ` · ${result.confidence} confidence` : ""}</div>}
                   </div>
-                  <span className="sbadge" style={{ background:`#${sevColor(result.severity)}22`, color:`#${sevColor(result.severity)}`, border:`1px solid #${sevColor(result.severity)}` }}>{result.severity}</span>
+                  <span className="sbadge" style={{
+                    background:`rgba(${result.severity==="severe"?"248,113,113":result.severity==="moderate"?"250,204,21":"110,229,105"},.12)`,
+                    color:`#${sevColor(result.severity)}`,
+                    border:`1px solid rgba(${result.severity==="severe"?"248,113,113":result.severity==="moderate"?"250,204,21":"110,229,105"},.4)`,
+                    fontSize:10, padding:"4px 10px"
+                  }}>{result.severity||"mild"}</span>
                 </div>
-                <p style={{ fontSize:13, color:"#b7e4c7", lineHeight:1.6, marginBottom:12 }}>{result.description}</p>
-                {result.treatment?.length>0&&<div style={{ marginBottom:10 }}>
-                  <div className="sectitle">💊 Treatment Steps</div>
-                  {result.treatment.map((s,i)=><div key={i} className="step"><div className="sn">{i+1}</div><div style={{ fontSize:12, color:"#b7e4c7", lineHeight:1.5 }}>{s}</div></div>)}
-                </div>}
-                {result.pesticide&&result.pesticide!=="N/A"&&<div style={{ background:"rgba(250,204,21,.07)", border:"1px solid rgba(250,204,21,.3)", borderRadius:9, padding:9, marginBottom:9 }}>
-                  <div className="sectitle">⚗️ RECOMMENDED PRODUCT</div>
-                  <div style={{ fontSize:12, color:"#fef08a" }}>{result.pesticide}</div>
-                </div>}
-                {result.disclaimer&&<div className="disclaimer">⚠️ {result.disclaimer}</div>}
-                {result.prevention&&<div style={{ fontSize:12, color:"#86efac", marginBottom:10, paddingTop:8, borderTop:"1px solid rgba(45,106,79,.2)" }}><span style={{ fontWeight:700 }}>🛡 Prevention: </span>{result.prevention}</div>}
-                <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-                  <button className="sbtn" onClick={speaking?()=>{window.speechSynthesis.cancel();setSpeaking(false);}:speak}>{speaking?"⏹ Stop":"🔊 Listen"}</button>
+
+                {/* Divider */}
+                <div style={{ height:"1px", background:"rgba(110,229,105,.1)", marginBottom:12 }}/>
+
+                {/* Description */}
+                <p style={{ fontSize:13, color:"#b7e4c7", lineHeight:1.65, marginBottom:14 }}>{result.description}</p>
+
+                {/* Treatment */}
+                {result.treatment?.length > 0 && (
+                  <div style={{ marginBottom:14 }}>
+                    <div className="sectitle" style={{ color:"#6ee569" }}>💊 Treatment Steps</div>
+                    {result.treatment.map((s,i)=>(
+                      <div key={i} className="step">
+                        <div className="sn">{i+1}</div>
+                        <div style={{ fontSize:12.5, color:"#b7e4c7", lineHeight:1.6, paddingTop:1 }}>{s}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Product */}
+                {result.pesticide && result.pesticide !== "N/A" && (
+                  <div style={{ background:"rgba(245,197,24,.06)", border:"1px solid rgba(245,197,24,.2)", borderRadius:12, padding:"10px 12px", marginBottom:12 }}>
+                    <div className="sectitle" style={{ color:"#f5c518", marginBottom:4 }}>⚗️ Recommended Product</div>
+                    <div style={{ fontSize:12.5, color:"#fef9c3", lineHeight:1.55 }}>{result.pesticide}</div>
+                  </div>
+                )}
+
+                {/* Disclaimer */}
+                {result.disclaimer && <div className="disclaimer">⚠️ {result.disclaimer}</div>}
+
+                {/* Prevention */}
+                {result.prevention && (
+                  <div style={{ fontSize:12.5, color:"#86efac", marginBottom:14, paddingTop:10, borderTop:"1px solid rgba(110,229,105,.1)", lineHeight:1.6 }}>
+                    <span style={{ fontWeight:700, color:"#6ee569" }}>🛡 Prevention: </span>{result.prevention}
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div style={{ display:"flex", gap:7, flexWrap:"wrap", paddingTop:4 }}>
+                  <button className="sbtn" onClick={speaking?()=>{window.speechSynthesis.cancel();setSpeaking(false);}:speak}>
+                    {speaking ? "⏹ Stop" : "🔊 Listen"}
+                  </button>
                   <button className="sbtn wa" onClick={shareWhatsApp}>📱 Share</button>
-                  <button className="sbtn" style={{ borderColor:"rgba(107,158,126,.35)", color:"#6b9e7e" }} onClick={()=>{ if(result&&location)setOutbreaks(p=>[{id:Date.now(),lat:location.lat+(Math.random()-.5)*.06,lng:location.lng+(Math.random()-.5)*.06,disease:result.disease,category:result.category||category,reports:1,date:new Date().toISOString().split("T")[0],state:"Your Area"},...p]); showToast("📍 Outbreak reported!"); }}>📍 Report</button>
-                  <button className="sbtn" style={{ borderColor:"rgba(107,158,126,.35)", color:"#6b9e7e" }} onClick={()=>{setResult(null);setImage(null);setImageBase64(null);setText("");}}>🔄 New</button>
+                  <button className="sbtn" style={{ color:"#60a5fa", borderColor:"rgba(96,165,250,.3)", background:"rgba(96,165,250,.06)" }}
+                    onClick={()=>{ if(result&&location) setOutbreaks(p=>[{id:Date.now(),lat:location.lat+(Math.random()-.5)*.06,lng:location.lng+(Math.random()-.5)*.06,disease:result.disease,category:result.category||category,reports:1,date:new Date().toISOString().split("T")[0],state:"Your Area"},...p]); showToast("📍 Outbreak reported!"); }}>
+                    📍 Report
+                  </button>
+                  <button className="sbtn" style={{ color:"#9ca3af", borderColor:"rgba(156,163,175,.2)", background:"transparent" }}
+                    onClick={()=>{setResult(null);setImage(null);setImageBase64(null);setText("");}}>
+                    🔄 New
+                  </button>
                 </div>
               </div>
             )}
 
-            {history.length>0&&!result&&(
-              <div style={{ marginTop:16 }}>
+            {/* History */}
+            {history.length > 0 && !result && (
+              <div style={{ marginTop:18 }}>
                 <div className="sectitle">Recent Diagnoses</div>
                 {history.slice(0,5).map((h,i)=>(
                   <div key={i} className="hi" onClick={()=>{ setResult(h); setImage(h.image||null); setCategory(h.category||"crops"); }}>
-                    {h.image?<img src={h.image} alt="" style={{ width:40,height:40,borderRadius:7,objectFit:"cover",flexShrink:0 }}/>:<div style={{ width:40,height:40,borderRadius:7,background:`#${CAT_COLORS[h.category||"crops"]}22`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>{subjectEmoji(h.category||"crops",h.subject)}</div>}
+                    {h.image
+                      ? <img src={h.image} alt="" style={{ width:44,height:44,borderRadius:10,objectFit:"cover",flexShrink:0 }}/>
+                      : <div style={{ width:44,height:44,borderRadius:10,background:`rgba(${CAT_COLORS[h.category||"crops"]?.match(/../g)?.map(x=>parseInt(x,16)).join(",")},0.15)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>{subjectEmoji(h.category||"crops",h.subject)}</div>
+                    }
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontWeight:700, color:"#4ade80", fontSize:12, marginBottom:1, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{h.disease}</div>
-                      <div style={{ fontSize:10, color:"#6b9e7e" }}>{h.subject} · {h.date}</div>
+                      <div style={{ fontWeight:700, color:"#6ee569", fontSize:13, marginBottom:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{h.disease}</div>
+                      <div style={{ fontSize:11, color:"#3d6b4a" }}>{h.subject} · {h.date}</div>
                     </div>
-                    <span className="sbadge" style={{ background:`#${sevColor(h.severity)}22`, color:`#${sevColor(h.severity)}`, fontSize:9 }}>{h.severity}</span>
+                    <span className="sbadge" style={{ background:`rgba(${sevColor(h.severity)==="4ade80"?"74,222,128":sevColor(h.severity)==="facc15"?"250,204,21":"248,113,113"},.12)`, color:`#${sevColor(h.severity)}`, fontSize:9 }}>{h.severity}</span>
                   </div>
                 ))}
               </div>
             )}
           </div>
         )}
-
         {/* ══ WEATHER TAB ══════════════════════════════════════════════════════ */}
         {tab==="weather" && (
           <div className="fi">
@@ -637,30 +789,29 @@ function AgroDocAI() {
             {weatherLoading&&<div style={{ textAlign:"center", color:"#6b9e7e", padding:20 }}><span className="pulse">🌤 Loading weather...</span></div>}
             {weather?.current_weather&&(
               <>
-                <div className="card" style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:36, marginBottom:4 }}>{WMO_CODES[weather.current_weather.weathercode]?.split(" ")[0]||"🌤"}</div>
-                  <div style={{ fontSize:32, fontWeight:800, color:"#4ade80" }}>{Math.round(weather.current_weather.temperature)}°C</div>
-                  <div style={{ fontSize:12, color:"#6b9e7e", marginTop:3 }}>{WMO_CODES[weather.current_weather.weathercode]||"Current weather"} · Wind {Math.round(weather.current_weather.windspeed)} km/h</div>
+                <div className="card" style={{ textAlign:"center", padding:24 }}>
+                  <div style={{ fontSize:48, marginBottom:8 }}>{WMO_CODES[weather.current_weather.weathercode]?.split(" ")[0]||"🌤"}</div>
+                  <div style={{ fontSize:36, fontWeight:900, color:"#6ee569", letterSpacing:"-.02em" }}>{Math.round(weather.current_weather.temperature)}°C</div>
+                  <div style={{ fontSize:12, color:"#5a8a65", marginTop:6 }}>{WMO_CODES[weather.current_weather.weathercode]||"Current weather"} · Wind {Math.round(weather.current_weather.windspeed)} km/h</div>
                 </div>
-                <div className="sectitle" style={{ marginTop:4 }}>7-Day Forecast</div>
-                <div style={{ display:"flex", gap:7, overflowX:"auto", paddingBottom:6, marginBottom:14 }}>
+                <div className="sectitle" style={{ marginTop:14 }}>7-Day Forecast</div>
+                <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:6, marginBottom:14 }}>
                   {(weather.daily?.time||[]).map((day,i)=>{
                     const code = weather.daily.weathercode[i];
                     const rain = weather.daily.precipitation_sum[i];
                     return(
-                      <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(45,106,79,.25)", borderRadius:10, padding:"9px 10px", textAlign:"center", minWidth:70, flexShrink:0 }}>
-                        <div style={{ fontSize:10, color:"#6b9e7e", marginBottom:4 }}>{new Date(day).toLocaleDateString("en",{weekday:"short"})}</div>
-                        <div style={{ fontSize:20 }}>{WMO_CODES[code]?.split(" ")[0]||"🌤"}</div>
-                        <div style={{ fontSize:12, fontWeight:700, color:"#4ade80", marginTop:3 }}>{Math.round(weather.daily.temperature_2m_max[i])}°</div>
-                        <div style={{ fontSize:10, color:"#6b9e7e" }}>{Math.round(weather.daily.temperature_2m_min[i])}°</div>
-                        {rain>0&&<div style={{ fontSize:9, color:"#60a5fa", marginTop:2 }}>{rain.toFixed(1)}mm</div>}
+                      <div key={i} style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(110,229,105,.12)", borderRadius:14, padding:"10px 10px", textAlign:"center", minWidth:68, flexShrink:0, transition:"all .2s" }}>
+                        <div style={{ fontSize:10, color:"#3d6b4a", marginBottom:5, fontWeight:600 }}>{new Date(day).toLocaleDateString("en",{weekday:"short"})}</div>
+                        <div style={{ fontSize:22 }}>{WMO_CODES[code]?.split(" ")[0]||"🌤"}</div>
+                        <div style={{ fontSize:13, fontWeight:800, color:"#6ee569", marginTop:4 }}>{Math.round(weather.daily.temperature_2m_max[i])}°</div>
+                        <div style={{ fontSize:10, color:"#3d6b4a" }}>{Math.round(weather.daily.temperature_2m_min[i])}°</div>
+                        {rain>0&&<div style={{ fontSize:9, color:"#60a5fa", marginTop:3, fontWeight:700 }}>💧{rain.toFixed(1)}mm</div>}
                       </div>
                     );
                   })}
                 </div>
               </>
             )}
-
             <div className="sectitle">Planting Calendar</div>
             <select className="inp" value={selectedCrop} onChange={e=>setSelectedCrop(e.target.value)} style={{ marginBottom:10 }}>
               {Object.keys(PLANTING_CALENDAR).map(c=><option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
@@ -668,16 +819,16 @@ function AgroDocAI() {
             {PLANTING_CALENDAR[selectedCrop]&&(
               <div className="card">
                 <div style={{ display:"flex", gap:10, marginBottom:10 }}>
-                  <div style={{ flex:1, background:"rgba(74,222,128,.07)", border:"1px solid rgba(74,222,128,.25)", borderRadius:9, padding:10 }}>
-                    <div className="sectitle">🌱 PLANT</div>
-                    <div style={{ fontSize:13, color:"#4ade80", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].plant.join(" · ")}</div>
+                  <div style={{ flex:1, background:"rgba(110,229,105,.06)", border:"1px solid rgba(110,229,105,.2)", borderRadius:12, padding:12 }}>
+                    <div className="sectitle" style={{ color:"#6ee569" }}>🌱 Plant</div>
+                    <div style={{ fontSize:13, color:"#6ee569", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].plant.join(" · ")}</div>
                   </div>
-                  <div style={{ flex:1, background:"rgba(250,204,21,.07)", border:"1px solid rgba(250,204,21,.25)", borderRadius:9, padding:10 }}>
-                    <div className="sectitle">🌾 HARVEST</div>
-                    <div style={{ fontSize:13, color:"#facc15", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].harvest.join(" · ")}</div>
+                  <div style={{ flex:1, background:"rgba(245,197,24,.06)", border:"1px solid rgba(245,197,24,.2)", borderRadius:12, padding:12 }}>
+                    <div className="sectitle" style={{ color:"#f5c518" }}>🌾 Harvest</div>
+                    <div style={{ fontSize:13, color:"#f5c518", fontWeight:700 }}>{PLANTING_CALENDAR[selectedCrop].harvest.join(" · ")}</div>
                   </div>
                 </div>
-                <div style={{ fontSize:12, color:"#86efac", lineHeight:1.55 }}>💡 {PLANTING_CALENDAR[selectedCrop].tips}</div>
+                <div style={{ fontSize:12.5, color:"#86efac", lineHeight:1.6 }}>💡 {PLANTING_CALENDAR[selectedCrop].tips}</div>
               </div>
             )}
           </div>
@@ -970,10 +1121,119 @@ function AgroDocAI() {
             </div>
           </div>
         )}
-      </div>
+        {/* ══ SETTINGS TAB ══════════════════════════════════════════════════════ */}
+        {tab==="settings" && (
+          <div className="fi">
 
-      {/* BOTTOM NAV */}
-      <nav className="bnav">
+            {/* Push Notifications */}
+            <div className="sectitle">🔔 Disease Outbreak Alerts</div>
+            <div className="card" style={{ marginBottom:14 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:14, marginBottom:4 }}>Outbreak Notifications</div>
+                  <div style={{ fontSize:12, color:"#3d6b4a", lineHeight:1.55 }}>Get alerts when disease outbreaks are reported near your farm. Be warned before it reaches you.</div>
+                </div>
+                <div style={{ width:44, height:24, background:notifEnabled?"rgba(110,229,105,.3)":"rgba(255,255,255,.08)", border:`1px solid ${notifEnabled?"rgba(110,229,105,.5)":"rgba(255,255,255,.1)"}`, borderRadius:12, cursor:"pointer", position:"relative", flexShrink:0, marginLeft:10 }}
+                  onClick={notifEnabled ? ()=>setNotifEnabled(false) : enableNotifications}>
+                  <div style={{ width:18, height:18, borderRadius:"50%", background:notifEnabled?"#6ee569":"#3d6b4a", position:"absolute", top:2, left:notifEnabled?22:2, transition:"left .2s" }}/>
+                </div>
+              </div>
+              {!notifEnabled && (
+                <button className="pbtn" onClick={enableNotifications} style={{ fontSize:13, padding:"10px" }}>
+                  🔔 Enable Outbreak Alerts
+                </button>
+              )}
+              {notifEnabled && (
+                <div style={{ background:"rgba(110,229,105,.06)", border:"1px solid rgba(110,229,105,.2)", borderRadius:10, padding:"8px 12px", fontSize:12, color:"#86efac" }}>
+                  ✅ Alerts are ON — you will be notified of outbreaks near your farm
+                </div>
+              )}
+            </div>
+
+            {/* Price Alerts */}
+            <div className="sectitle">💰 Market Price Alerts</div>
+            <div style={{ fontSize:12, color:"#3d6b4a", marginBottom:10, lineHeight:1.55 }}>Set a price target and get notified when the market hits it. Never miss the right time to buy or sell.</div>
+
+            {priceAlerts.length > 0 && priceAlerts.map(a => (
+              <div key={a.id} style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(110,229,105,.15)", borderRadius:12, padding:"12px 14px", marginBottom:8, display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontWeight:700, fontSize:13, color:"#6ee569" }}>{a.crop}</div>
+                  <div style={{ fontSize:12, color:"#3d6b4a" }}>Alert when price goes {a.direction} ₦{Number(a.threshold).toLocaleString()}</div>
+                </div>
+                <button onClick={()=>deleteAlert(a.id)} style={{ background:"rgba(248,113,113,.1)", border:"1px solid rgba(248,113,113,.25)", color:"#f87171", borderRadius:8, padding:"4px 10px", fontSize:11, cursor:"pointer", fontWeight:700 }}>Remove</button>
+              </div>
+            ))}
+
+            {showAlertForm ? (
+              <div className="card fi" style={{ marginBottom:12 }}>
+                <div className="sectitle" style={{ marginBottom:10 }}>New Price Alert</div>
+                <div style={{ marginBottom:8 }}>
+                  <div style={{ fontSize:11, color:"#3d6b4a", marginBottom:4, fontWeight:700 }}>Commodity</div>
+                  <select className="inp" value={alertForm.crop} onChange={e=>setAlertForm(p=>({...p,crop:e.target.value}))}>
+                    {MARKET_PRICES.map(m=><option key={m.crop} value={m.crop}>{m.crop}</option>)}
+                  </select>
+                </div>
+                <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:11, color:"#3d6b4a", marginBottom:4, fontWeight:700 }}>Alert when price goes</div>
+                    <select className="inp" value={alertForm.direction} onChange={e=>setAlertForm(p=>({...p,direction:e.target.value}))}>
+                      <option value="below">Below (good time to buy)</option>
+                      <option value="above">Above (good time to sell)</option>
+                    </select>
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:11, color:"#3d6b4a", marginBottom:4, fontWeight:700 }}>Target Price (₦)</div>
+                    <input className="inp" type="number" value={alertForm.threshold} onChange={e=>setAlertForm(p=>({...p,threshold:Number(e.target.value)}))} placeholder="e.g. 30000"/>
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button className="pbtn" style={{ flex:1, fontSize:13, padding:"10px" }} onClick={saveAlert}>Save Alert</button>
+                  <button className="sbtn" onClick={()=>setShowAlertForm(false)}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <button className="sbtn" style={{ width:"100%", justifyContent:"center", padding:"11px", marginBottom:16 }} onClick={()=>setShowAlertForm(true)}>
+                + Add Price Alert
+              </button>
+            )}
+
+            {/* App Info */}
+            <div className="sectitle">ℹ️ About AgroDoc AI</div>
+            <div className="card">
+              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+                <div style={{ width:48, height:48, borderRadius:14, background:"linear-gradient(135deg,#164024,#2d8a50)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:24 }}>🌿</div>
+                <div>
+                  <div style={{ fontWeight:800, fontSize:15, color:"#6ee569" }}>AgroDoc AI</div>
+                  <div style={{ fontSize:11, color:"#3d6b4a" }}>Version 4.0 · Cache 2026.05.v4</div>
+                </div>
+              </div>
+              {[
+                ["Founder", "Adegbegi Martins Maxwell"],
+                ["Email", "adegbegimartinsmaxwell@gmail.com"],
+                ["Website", "agrodoc-ai.vercel.app"],
+                ["Diseases Covered", "30 diseases across 4 sectors"],
+                ["Languages", "English, Pidgin, Hausa, Yoruba, Igbo"],
+                ["Data Protection", "NDPR 2019 Compliant"],
+              ].map(([k,v])=>(
+                <div key={k} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0", borderBottom:"1px solid rgba(110,229,105,.06)", fontSize:12 }}>
+                  <span style={{ color:"#3d6b4a", fontWeight:600 }}>{k}</span>
+                  <span style={{ color:"#b7e4c7", textAlign:"right", maxWidth:"60%" }}>{v}</span>
+                </div>
+              ))}
+              <div style={{ marginTop:12 }}>
+                <a href="https://agrodoc-ai.vercel.app" target="_blank" rel="noreferrer" style={{ fontSize:12, color:"#6ee569", textDecoration:"none", display:"block", marginBottom:6 }}>🌐 Open Web App</a>
+                <a href="mailto:adegbegimartinsmaxwell@gmail.com" style={{ fontSize:12, color:"#60a5fa", textDecoration:"none" }}>📬 Contact the Founder</a>
+              </div>
+            </div>
+
+            {/* Clear Data */}
+            <div className="sectitle" style={{ marginTop:14 }}>🗑 Data</div>
+            <button onClick={()=>{ if(window.confirm("Clear all history and journal entries?")){localStorage.clear();window.location.reload();} }} style={{ background:"rgba(248,113,113,.08)", border:"1px solid rgba(248,113,113,.2)", color:"#f87171", width:"100%", padding:"11px", borderRadius:12, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"'Outfit',sans-serif" }}>
+              Clear All Local Data
+            </button>
+
+          </div>
+        )}
         {tabs.map(tb=>(
           <button key={tb.id} className={`ntab ${tab===tb.id?"on":""}`} onClick={()=>setTab(tb.id)}>
             <span>{tb.icon}</span>{tb.label}
@@ -984,14 +1244,12 @@ function AgroDocAI() {
   );
 }
 
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(AgroDocAI));
-// Hide loading screen when app mounts
-setTimeout(() => {
-  const l = document.getElementById('loading');
-  if (l) { l.style.opacity = '0'; l.style.transition = 'opacity 0.3s'; setTimeout(() => l.remove(), 300); }
-}, 800);
+setTimeout(()=>{
+  const l=document.getElementById('ld');
+  if(l){l.style.transition='opacity .4s';l.style.opacity='0';setTimeout(()=>l.remove(),400);}
+},1200);
 </script>
 </body>
 </html>
