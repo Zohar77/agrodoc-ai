@@ -1234,6 +1234,11 @@ function AgroDocAI() {
 
           </div>
         )}
+
+      </div>
+
+      {/* BOTTOM NAV */}
+      <nav className="bnav">
         {tabs.map(tb=>(
           <button key={tb.id} className={`ntab ${tab===tb.id?"on":""}`} onClick={()=>setTab(tb.id)}>
             <span>{tb.icon}</span>{tb.label}
