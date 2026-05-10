@@ -243,13 +243,65 @@ app.get("/api/audit",(req,res)=>{
   res.json({total:auditLog.length,page,entries:slice});
 });
 
-// Analytics
+// Analytics — Full real data for admin dashboard
 app.get("/api/analytics",(req,res)=>{
   if(req.headers["x-admin-key"]!==process.env.ADMIN_KEY&&process.env.NODE_ENV==="production")return res.status(403).json({error:"Forbidden"});
   const all=[...sessions.values()];
+  
+  // Disease breakdown
+  const diseaseBreakdown={};
+  auditLog.forEach(e=>{
+    if(e.disease&&e.disease!=="unknown"){
+      diseaseBreakdown[e.disease]=(diseaseBreakdown[e.disease]||0)+1;
+    }
+  });
+  
+  // Category breakdown
   const catBreakdown={};
   auditLog.forEach(e=>{catBreakdown[e.category]=(catBreakdown[e.category]||0)+1;});
-  res.json({total_sessions:sessions.size,active_last_7_days:all.filter(s=>s.lastSeen>Date.now()-7*24*60*60*1000).length,total_diagnoses:auditLog.length,total_feedback:feedbackStore.length,feedback_accuracy_percent:feedbackStore.length>0?Math.round((feedbackStore.filter(f=>f.worked).length/feedbackStore.length)*100):null,diagnosis_by_category:catBreakdown,uptime_seconds:Math.floor(process.uptime()),cache_version:CACHE_VERSION});
+  
+  // Language breakdown
+  const langBreakdown={};
+  auditLog.forEach(e=>{langBreakdown[e.lang]=(langBreakdown[e.lang]||0)+1;});
+  
+  // Severity breakdown
+  const sevBreakdown={};
+  auditLog.forEach(e=>{sevBreakdown[e.severity]=(sevBreakdown[e.severity]||0)+1;});
+  
+  // Top diseases sorted
+  const topDiseases=Object.entries(diseaseBreakdown)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,10)
+    .map(([disease,count])=>({disease,count}));
+  
+  // Daily diagnoses last 7 days
+  const dailyStats={};
+  const now=Date.now();
+  for(let i=6;i>=0;i--){
+    const d=new Date(now-i*24*60*60*1000).toISOString().split("T")[0];
+    dailyStats[d]=0;
+  }
+  auditLog.forEach(e=>{
+    const d=e.timestamp?.split("T")[0];
+    if(d&&dailyStats.hasOwnProperty(d)) dailyStats[d]++;
+  });
+  
+  res.json({
+    total_sessions:sessions.size,
+    active_last_7_days:all.filter(s=>s.lastSeen>Date.now()-7*24*60*60*1000).length,
+    total_diagnoses:auditLog.length,
+    total_feedback:feedbackStore.length,
+    feedback_accuracy_percent:feedbackStore.length>0?Math.round((feedbackStore.filter(f=>f.worked).length/feedbackStore.length)*100):null,
+    diagnosis_by_category:catBreakdown,
+    diagnosis_by_language:langBreakdown,
+    diagnosis_by_severity:sevBreakdown,
+    top_diseases:topDiseases,
+    daily_diagnoses:dailyStats,
+    uptime_seconds:Math.floor(process.uptime()),
+    cache_version:CACHE_VERSION,
+    total_registrations:getRegistrations().length,
+    approved_registrations:getRegistrations().filter(r=>r.approved).length,
+  });
 });
 
 // Market prices
@@ -259,6 +311,118 @@ app.post("/api/market/update",express.json(),(req,res)=>{
   if(!Array.isArray(req.body.prices))return res.status(400).json({error:"prices must be an array"});
   MARKET_PRICES=req.body.prices.map(p=>({...p,updated:new Date().toISOString()}));
   res.json({success:true,count:MARKET_PRICES.length});
+});
+
+// ── DATA EXPORT — CSV for Excel + JSON for Power BI ──────────────────────────
+
+// Export diagnoses as CSV (Excel-ready)
+app.get("/api/export/diagnoses",(req,res)=>{
+  if(req.headers["x-admin-key"]!==process.env.ADMIN_KEY)return res.status(403).json({error:"Forbidden"});
+  const headers=["Diagnosis ID","Category","Disease","Severity","Confidence","Language","Source","Date","Time"];
+  const rows=auditLog.map(e=>{
+    const dt=e.timestamp?new Date(e.timestamp):new Date();
+    return [
+      e.diagnosisId||"",
+      e.category||"",
+      (e.disease||"").replace(/,/g,";"),
+      e.severity||"",
+      e.confidence||"",
+      e.lang||"en",
+      e.source||"",
+      dt.toLocaleDateString("en-NG"),
+      dt.toLocaleTimeString("en-NG"),
+    ].map(v=>`"${v}"`).join(",");
+  });
+  const csv=[headers.join(","),...rows].join("\n");
+  res.setHeader("Content-Type","text/csv");
+  res.setHeader("Content-Disposition",`attachment; filename="agrodoc_diagnoses_${new Date().toISOString().split("T")[0]}.csv"`);
+  res.send(csv);
+});
+
+// Export registrations as CSV (Excel-ready)
+app.get("/api/export/registrations",(req,res)=>{
+  if(req.headers["x-admin-key"]!==process.env.ADMIN_KEY)return res.status(403).json({error:"Forbidden"});
+  const headers=["ID","Type","Business Name","Contact Name","Phone","Email","State/LGA","Services","Source","Submitted Date","Approved"];
+  const rows=getRegistrations().map(r=>[
+    r.id||"",
+    r.type||"",
+    (r.businessName||"").replace(/,/g,";"),
+    (r.contactName||"").replace(/,/g,";"),
+    r.phone||r.contactPhone||"",
+    r.email||"",
+    (r.stateLGA||"").replace(/,/g,";"),
+    (r.services||"").replace(/,/g,";"),
+    r.source||"",
+    r.submittedAt?new Date(r.submittedAt).toLocaleDateString("en-NG"):"",
+    r.approved?"Yes":"No",
+  ].map(v=>`"${v}"`).join(","));
+  const csv=[headers.join(","),...rows].join("\n");
+  res.setHeader("Content-Type","text/csv");
+  res.setHeader("Content-Disposition",`attachment; filename="agrodoc_registrations_${new Date().toISOString().split("T")[0]}.csv"`);
+  res.send(csv);
+});
+
+// Export feedback as CSV
+app.get("/api/export/feedback",(req,res)=>{
+  if(req.headers["x-admin-key"]!==process.env.ADMIN_KEY)return res.status(403).json({error:"Forbidden"});
+  const headers=["Diagnosis ID","Disease","Category","Severity","Treatment Worked","Date"];
+  const rows=feedbackStore.map(f=>[
+    f.diagnosisId||"",
+    (f.disease||"").replace(/,/g,";"),
+    f.category||"",
+    f.severity||"",
+    f.worked?"Yes":"No",
+    f.date?new Date(f.date).toLocaleDateString("en-NG"):"",
+  ].map(v=>`"${v}"`).join(","));
+  const csv=[headers.join(","),...rows].join("\n");
+  res.setHeader("Content-Type","text/csv");
+  res.setHeader("Content-Disposition",`attachment; filename="agrodoc_feedback_${new Date().toISOString().split("T")[0]}.csv"`);
+  res.send(csv);
+});
+
+// Power BI JSON feed — all data in one endpoint
+app.get("/api/powerbi",(req,res)=>{
+  if(req.headers["x-admin-key"]!==process.env.ADMIN_KEY)return res.status(403).json({error:"Forbidden"});
+
+  // Summary
+  const diseaseBreakdown={};
+  const catBreakdown={};
+  const langBreakdown={};
+  const sevBreakdown={};
+  const dailyStats={};
+
+  auditLog.forEach(e=>{
+    if(e.disease&&e.disease!=="unknown") diseaseBreakdown[e.disease]=(diseaseBreakdown[e.disease]||0)+1;
+    if(e.category) catBreakdown[e.category]=(catBreakdown[e.category]||0)+1;
+    if(e.lang) langBreakdown[e.lang]=(langBreakdown[e.lang]||0)+1;
+    if(e.severity) sevBreakdown[e.severity]=(sevBreakdown[e.severity]||0)+1;
+    const d=e.timestamp?.split("T")[0];
+    if(d) dailyStats[d]=(dailyStats[d]||0)+1;
+  });
+
+  res.json({
+    generated_at: new Date().toISOString(),
+    summary:{
+      total_diagnoses:auditLog.length,
+      total_sessions:sessions.size,
+      total_registrations:getRegistrations().length,
+      approved_registrations:getRegistrations().filter(r=>r.approved).length,
+      total_feedback:feedbackStore.length,
+      feedback_accuracy_percent:feedbackStore.length>0?Math.round((feedbackStore.filter(f=>f.worked).length/feedbackStore.length)*100):null,
+    },
+    diagnoses_by_disease:Object.entries(diseaseBreakdown).map(([disease,count])=>({disease,count})).sort((a,b)=>b.count-a.count),
+    diagnoses_by_category:Object.entries(catBreakdown).map(([category,count])=>({category,count})),
+    diagnoses_by_language:Object.entries(langBreakdown).map(([language,count])=>({language,count})),
+    diagnoses_by_severity:Object.entries(sevBreakdown).map(([severity,count])=>({severity,count})),
+    daily_diagnoses:Object.entries(dailyStats).sort().map(([date,count])=>({date,count})),
+    registrations:getRegistrations().map(r=>({
+      type:r.type,
+      stateLGA:r.stateLGA,
+      approved:r.approved,
+      submittedAt:r.submittedAt,
+    })),
+    raw_diagnoses:auditLog.slice(-500), // Last 500 diagnoses for Power BI
+  });
 });
 
 // ── REGISTRATIONS (Vets + Agro Dealers) ──────────────────────────────────────
