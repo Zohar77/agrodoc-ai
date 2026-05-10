@@ -5,46 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AgroDoc AI — Admin Dashboard</title>
 <style>
-:root{--g1:#050e07;--g2:#0a1f10;--lime:#6ee569;--gold:#f5c518;--red:#f87171;--blue:#60a5fa;--card:rgba(255,255,255,.04);--border:rgba(110,229,105,.12)}
+:root{--g1:#050e07;--g2:#0a1f10;--lime:#6ee569;--gold:#f5c518;--red:#f87171;--blue:#60a5fa;--purple:#a78bfa;--card:rgba(255,255,255,.04);--border:rgba(110,229,105,.12)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-height:100vh}
-.hdr{background:var(--g2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.logo{font-size:17px;font-weight:800;color:var(--lime);display:flex;align-items:center;gap:8px}
+.hdr{background:var(--g2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;backdrop-filter:blur(16px)}
+.logo{font-size:17px;font-weight:800;color:var(--lime)}
 .inp{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:#e8f5e9;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
-.btn{background:linear-gradient(135deg,#15803d,#22c55e);color:#071209;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;width:100%;font-family:inherit;transition:all .2s}
-.btn:hover{transform:translateY(-1px)}
+.btn{background:linear-gradient(135deg,#15803d,#22c55e);color:#071209;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;width:100%;font-family:inherit}
 .rbtn{background:transparent;border:1px solid var(--border);color:#3d6b4a;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s}
 .rbtn:hover{color:var(--lime);border-color:var(--lime)}
-.login-box{background:var(--g2);border:1px solid var(--border);border-radius:18px;padding:36px;max-width:380px;margin:80px auto}
-.dash{padding:20px 24px;display:none}
+.login-box{background:var(--g2);border:1px solid var(--border);border-radius:18px;padding:36px;max-width:400px;margin:80px auto}
+.dash{padding:20px 24px;display:none;max-width:1200px;margin:0 auto}
 .dash.on{display:block}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
-.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;transition:all .2s}
+.sc:hover{border-color:rgba(110,229,105,.3)}
 .sn{font-size:30px;font-weight:900;line-height:1;margin-bottom:4px}
 .sl{font-size:10px;color:#3d6b4a;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
-.stitle{font-size:11px;font-weight:700;color:var(--lime);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
+.section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.stitle{font-size:11px;font-weight:700;color:var(--lime);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
 .rrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(110,229,105,.05)}
 .rrow:last-child{border-bottom:none}
-.rtag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px}
+.rtag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;flex-shrink:0}
 .rtag.d{background:rgba(245,197,24,.1);color:var(--gold)}
 .rtag.v{background:rgba(96,165,250,.1);color:var(--blue)}
-.apbtn{background:rgba(110,229,105,.08);border:1px solid rgba(110,229,105,.25);color:var(--lime);padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
-.apbtn.done{opacity:.6;cursor:default}
-.dbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.dn{font-size:12px;width:150px;flex-shrink:0;color:#b7e4c7}
-.dbg{flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:7px}
-.df{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--lime),#a8ff6b);transition:width .6s ease}
-.dc{font-size:11px;color:#3d6b4a;width:24px;text-align:right;flex-shrink:0}
+.apbtn{background:rgba(110,229,105,.08);border:1px solid rgba(110,229,105,.25);color:var(--lime);padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.apbtn.done{opacity:.6;cursor:default;background:rgba(110,229,105,.04)}
+.dbar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.dn{font-size:12px;width:170px;flex-shrink:0;color:#b7e4c7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dbg{flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:8px}
+.df{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--lime),#a8ff6b);transition:width .8s ease}
+.dc{font-size:11px;color:#3d6b4a;width:28px;text-align:right;flex-shrink:0;font-weight:700}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);display:inline-block;margin-right:5px;animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:10px;display:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:600px){.grid2{grid-template-columns:1fr}}
-.spill{font-size:11px;background:rgba(110,229,105,.06);border:1px solid var(--border);border-radius:16px;padding:4px 10px;display:inline-block;margin:2px}
-.health-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(110,229,105,.05);font-size:13px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:768px){.grid2,.grid3{grid-template-columns:1fr}}
+.pill{font-size:11px;background:rgba(110,229,105,.07);border:1px solid var(--border);border-radius:16px;padding:5px 12px;display:inline-block;margin:3px;color:#b7e4c7}
+.health-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(110,229,105,.06);font-size:13px}
 .health-row:last-child{border-bottom:none}
-.hval{color:var(--lime);font-weight:700}
+.hval{font-weight:700}
+.cat-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:8px 14px;margin:4px;font-size:13px}
+.day-bar{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.day-bar-inner{width:100%;background:rgba(255,255,255,.05);border-radius:4px 4px 0 0;display:flex;align-items:flex-end;justify-content:center;height:60px}
+.day-bar-fill{width:70%;background:linear-gradient(to top,var(--lime),#a8ff6b);border-radius:3px 3px 0 0;min-height:2px;transition:height .6s ease}
+.day-label{font-size:10px;color:#3d6b4a;font-weight:600}
+.day-count{font-size:10px;color:var(--lime);font-weight:700}
+.chart-row{display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:12px}
+.ebtn{background:rgba(110,229,105,.08);border:1px solid rgba(110,229,105,.25);color:var(--lime);padding:8px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.ebtn:hover{background:rgba(110,229,105,.16);transform:translateY(-1px)}
 </style>
 </head>
 <body>
@@ -53,7 +63,7 @@ body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-he
   <div class="logo">🌿 AgroDoc AI Admin</div>
   <div style="display:flex;align-items:center;gap:10px">
     <span id="st" style="font-size:12px;color:#3d6b4a"></span>
-    <button class="rbtn" onclick="loadData()">🔄 Refresh</button>
+    <button class="rbtn" onclick="loadAll()">🔄 Refresh</button>
     <button class="rbtn" onclick="doLogout()">Logout</button>
   </div>
 </div>
@@ -61,27 +71,105 @@ body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-he
 <!-- LOGIN -->
 <div id="ls">
   <div class="login-box">
-    <div style="text-align:center;margin-bottom:24px">
-      <div style="font-size:44px;margin-bottom:10px">🌿</div>
-      <div style="font-size:19px;font-weight:800;color:#6ee569">AgroDoc AI</div>
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:48px;margin-bottom:10px">🌿</div>
+      <div style="font-size:20px;font-weight:800;color:#6ee569">AgroDoc AI</div>
       <div style="font-size:13px;color:#3d6b4a;margin-top:4px">Admin Dashboard</div>
     </div>
-    <div class="err" id="le">Wrong key or URL. Please check and try again.</div>
-    <input class="inp" type="url" id="bu" placeholder="Backend URL — https://agrodoc-ai.onrender.com"/>
-    <input class="inp" type="password" id="ak" placeholder="Admin Key"/>
+    <div class="err" id="le">Wrong key or URL. Try again.</div>
+    <div style="font-size:11px;color:#3d6b4a;margin-bottom:4px;font-weight:700">BACKEND URL</div>
+    <input class="inp" type="url" id="bu" placeholder="https://agrodoc-ai.onrender.com"/>
+    <div style="font-size:11px;color:#3d6b4a;margin-bottom:4px;font-weight:700">ADMIN KEY</div>
+    <input class="inp" type="password" id="ak" placeholder="Your admin key from Render"/>
     <button class="btn" onclick="doLogin()">🔑 Enter Dashboard</button>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div class="dash" id="ds">
-  <div class="stats">
-    <div class="sc"><div class="sn" style="color:#6ee569" id="sd">—</div><div class="sl">Diagnoses</div></div>
-    <div class="sc"><div class="sn" style="color:#f5c518" id="ss">—</div><div class="sl">Sessions</div></div>
-    <div class="sc"><div class="sn" style="color:#60a5fa" id="sr">—</div><div class="sl">Registrations</div></div>
-    <div class="sc"><div class="sn" style="color:#a78bfa" id="sf">—</div><div class="sl">Feedback</div></div>
-    <div class="sc"><div class="sn" style="color:#6ee569" id="su">—</div><div class="sl">Uptime</div></div>
-    <div class="sc"><div class="sn" style="color:#f5c518" id="sm">—</div><div class="sl">Memory MB</div></div>
+
+  <!-- Top stats -->
+  <div class="stats" id="top-stats">
+    <div class="sc"><div class="sn" style="color:var(--lime)" id="sd">—</div><div class="sl">Total Diagnoses</div></div>
+    <div class="sc"><div class="sn" style="color:var(--gold)" id="ss">—</div><div class="sl">Active Sessions</div></div>
+    <div class="sc"><div class="sn" style="color:var(--blue)" id="sr">—</div><div class="sl">Registrations</div></div>
+    <div class="sc"><div class="sn" style="color:var(--purple)" id="sf">—</div><div class="sl">Feedback</div></div>
+    <div class="sc"><div class="sn" style="color:var(--lime)" id="sa">—</div><div class="sl">Accuracy %</div></div>
+    <div class="sc"><div class="sn" style="color:var(--gold)" id="su">—</div><div class="sl">Uptime</div></div>
+  </div>
+
+  <!-- Daily chart + health -->
+  <div class="grid2">
+    <div class="section">
+      <div class="stitle">📈 Diagnoses — Last 7 Days</div>
+      <div class="chart-row" id="daily-chart">
+        <div style="color:#3d6b4a;font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="stitle">⚙️ System Health</div>
+      <div id="hl">Checking...</div>
+    </div>
+  </div>
+
+  <!-- Top diseases + categories -->
+  <div class="grid2">
+    <div class="section">
+      <div class="stitle">🦠 Top Diseases Diagnosed</div>
+      <div id="dl"><div style="color:#3d6b4a;font-size:13px">No diagnosis data yet</div></div>
+    </div>
+    <div class="section">
+      <div class="stitle">🌾 By Farm Sector</div>
+      <div id="cl"><div style="color:#3d6b4a;font-size:13px">No data yet</div></div>
+    </div>
+  </div>
+
+  <!-- Languages + severity -->
+  <div class="grid2">
+    <div class="section">
+      <div class="stitle">🌐 By Language</div>
+      <div id="ll"><div style="color:#3d6b4a;font-size:13px">No data yet</div></div>
+    </div>
+    <div class="section">
+      <div class="stitle">⚠️ By Severity</div>
+      <div id="sevl"><div style="color:#3d6b4a;font-size:13px">No data yet</div></div>
+    </div>
+  </div>
+
+  <!-- Export section -->
+  <div class="section">
+    <div class="stitle">📥 Export Data</div>
+    <div style="font-size:13px;color:#3d6b4a;margin-bottom:14px;line-height:1.6">Download your data as CSV files — open directly in Excel or Google Sheets. Connect Power BI using the JSON feed URL.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="ebtn" onclick="exportData('diagnoses')">📊 Download Diagnoses CSV</button>
+      <button class="ebtn" onclick="exportData('registrations')">📋 Download Registrations CSV</button>
+      <button class="ebtn" onclick="exportData('feedback')">💬 Download Feedback CSV</button>
+      <button class="ebtn" style="background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.3);color:var(--blue)" onclick="copyPowerBI()">📡 Copy Power BI URL</button>
+    </div>
+    <div id="export-msg" style="font-size:12px;color:var(--lime);margin-top:10px;display:none"></div>
+
+    <!-- Power BI Instructions -->
+    <div style="margin-top:16px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.15);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:8px">📊 How to Connect Power BI</div>
+      <div style="font-size:12px;color:#3d6b4a;line-height:1.8">
+        1. Open Power BI Desktop → Get Data → Web<br/>
+        2. Paste your Power BI URL (click button above)<br/>
+        3. Click OK → Power BI loads all your farm data<br/>
+        4. Build charts for diseases, languages, regions<br/>
+        5. Refresh anytime to get latest data
+      </div>
+    </div>
+
+    <!-- Excel Instructions -->
+    <div style="margin-top:10px;background:rgba(110,229,105,.05);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--lime);margin-bottom:8px">📗 How to Open in Excel</div>
+      <div style="font-size:12px;color:#3d6b4a;line-height:1.8">
+        1. Click "Download Diagnoses CSV" above<br/>
+        2. Open Excel → File → Open → select the downloaded CSV<br/>
+        3. All diagnoses appear as rows with columns for disease, category, language, date<br/>
+        4. Use Excel pivot tables to analyse by region, disease, or language
+      </div>
+    </div>
   </div>
 
   <!-- Registrations -->
@@ -93,35 +181,20 @@ body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-he
     <div id="rl"><div style="text-align:center;color:#3d6b4a;padding:20px;font-size:13px">Loading...</div></div>
   </div>
 
-  <div class="grid2">
-    <!-- Top diseases -->
-    <div class="section">
-      <div class="stitle">🦠 Top Diseases Diagnosed</div>
-      <div id="dl"></div>
-    </div>
-
-    <!-- System health -->
-    <div class="section">
-      <div class="stitle">⚙️ System Health</div>
-      <div id="hl">Checking...</div>
-    </div>
-  </div>
-
-  <!-- Active States -->
-  <div class="section">
-    <div class="stitle">📍 Farmer Locations</div>
-    <div id="sll" style="color:#3d6b4a;font-size:13px">No data yet</div>
-  </div>
 </div>
 
 <script>
-let B='',K='';
+let B='', K='';
+const LANG_NAMES={en:'English',pcm:'Pidgin',ha:'Hausa',yo:'Yoruba',ig:'Igbo'};
+const CAT_EMOJI={crops:'🌿',poultry:'🐔',fish:'🐟',livestock:'🐄'};
+const SEV_COLOR={mild:'#6ee569',moderate:'#f5c518',severe:'#f87171',unknown:'#3d6b4a'};
+
 function doLogin(){
   B=(document.getElementById('bu').value||'').trim().replace(/\/$/,'');
   K=document.getElementById('ak').value.trim();
   if(!B||!K){showErr('Please fill in both fields');return;}
   localStorage.setItem('adab',B);
-  loadData();
+  loadAll();
 }
 function doLogout(){
   document.getElementById('ls').style.display='block';
@@ -130,91 +203,205 @@ function doLogout(){
 }
 function showErr(m){const e=document.getElementById('le');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',4000);}
 
-async function loadData(){
+function makeBars(data, maxVal, colorFn){
+  return data.map(([name,val])=>`
+    <div class="dbar">
+      <div class="dn" title="${name}">${name}</div>
+      <div class="dbg"><div class="df" style="width:${maxVal>0?(val/maxVal)*100:0}%"></div></div>
+      <div class="dc">${val}</div>
+    </div>
+  `).join('');
+}
+
+async function loadAll(){
   if(!B){B=localStorage.getItem('adab')||'';if(!B)return;}
   document.getElementById('ls').style.display='none';
   document.getElementById('ds').classList.add('on');
   document.getElementById('st').innerHTML='<span class="dot"></span>Loading...';
 
+  // Load health + analytics in parallel
+  const [healthData, analyticsData] = await Promise.all([
+    fetch(`${B}/health`).then(r=>r.json()).catch(()=>null),
+    fetch(`${B}/api/analytics`,{headers:{'X-Admin-Key':K}}).then(r=>r.json()).catch(()=>null),
+  ]);
+
   // Health
-  try{
-    const h=await(await fetch(`${B}/health`)).json();
-    document.getElementById('sd').textContent=h.total_diagnoses||0;
-    document.getElementById('ss').textContent=h.sessions_active||0;
-    document.getElementById('sf').textContent=h.feedback_count||0;
-    document.getElementById('su').textContent=h.uptime_seconds?Math.round(h.uptime_seconds/60)+'m':'—';
-    document.getElementById('sm').textContent=h.memory_mb||'—';
+  if(healthData){
+    document.getElementById('sd').textContent=healthData.total_diagnoses||0;
+    document.getElementById('ss').textContent=healthData.sessions_active||0;
+    document.getElementById('sf').textContent=healthData.feedback_count||0;
+    document.getElementById('su').textContent=healthData.uptime_seconds?Math.round(healthData.uptime_seconds/60)+'m':'—';
     document.getElementById('hl').innerHTML=`
-      <div class="health-row"><span>Status</span><span class="hval">🟢 LIVE</span></div>
-      <div class="health-row"><span>Version</span><span class="hval">${h.version||'3.0.0'}</span></div>
-      <div class="health-row"><span>AI Engine</span><span class="hval">${h.ai_configured?'✅ Connected':'❌ Not set'}</span></div>
-      <div class="health-row"><span>WhatsApp</span><span class="hval">${h.whatsapp_configured?'✅ Live':'⏳ Pending'}</span></div>
-      <div class="health-row"><span>Cache</span><span class="hval">${h.cache_version||'—'}</span></div>
-      <div class="health-row"><span>Checked</span><span class="hval">${new Date().toLocaleTimeString('en-NG')}</span></div>
+      <div class="health-row"><span>Status</span><span class="hval" style="color:var(--lime)">🟢 LIVE</span></div>
+      <div class="health-row"><span>Version</span><span class="hval">${healthData.version||'3.0.0'}</span></div>
+      <div class="health-row"><span>AI Engine</span><span class="hval">${healthData.ai_configured?'✅ Connected':'❌ Not set'}</span></div>
+      <div class="health-row"><span>WhatsApp</span><span class="hval">${healthData.whatsapp_configured?'✅ Live':'⏳ Pending'}</span></div>
+      <div class="health-row"><span>Cache</span><span class="hval">${healthData.cache_version||'—'}</span></div>
+      <div class="health-row"><span>Memory</span><span class="hval">${healthData.memory_mb||'—'} MB</span></div>
+      <div class="health-row"><span>Last checked</span><span class="hval" style="color:#3d6b4a">${new Date().toLocaleTimeString('en-NG')}</span></div>
     `;
     document.getElementById('st').innerHTML='<span class="dot"></span>Online';
-  }catch(e){
+  } else {
     document.getElementById('hl').innerHTML='<span style="color:#f87171">❌ Cannot reach backend</span>';
     document.getElementById('st').innerHTML='<span style="width:8px;height:8px;border-radius:50%;background:#f87171;display:inline-block;margin-right:5px"></span>Offline';
   }
 
+  // Analytics
+  if(analyticsData){
+    document.getElementById('sa').textContent=analyticsData.feedback_accuracy_percent!=null?analyticsData.feedback_accuracy_percent+'%':'—';
+    document.getElementById('sr').textContent=analyticsData.total_registrations||0;
+
+    // Daily chart
+    if(analyticsData.daily_diagnoses){
+      const days=Object.entries(analyticsData.daily_diagnoses);
+      const maxD=Math.max(...days.map(d=>d[1]),1);
+      document.getElementById('daily-chart').innerHTML=`
+        <div style="display:flex;align-items:flex-end;gap:8px;width:100%;height:80px">
+          ${days.map(([date,count])=>`
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+              <div style="font-size:10px;color:var(--lime);font-weight:700;min-height:14px">${count>0?count:''}</div>
+              <div style="width:100%;background:rgba(255,255,255,.05);border-radius:4px 4px 0 0;display:flex;align-items:flex-end;height:50px">
+                <div style="width:100%;background:linear-gradient(to top,var(--lime),#a8ff6b);border-radius:3px 3px 0 0;height:${maxD>0?(count/maxD)*100:0}%;min-height:${count>0?2:0}px;transition:height .6s ease"></div>
+              </div>
+              <div style="font-size:9px;color:#3d6b4a;font-weight:600">${new Date(date).toLocaleDateString('en',{weekday:'short'})}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Top diseases
+    if(analyticsData.top_diseases?.length>0){
+      const maxD=Math.max(...analyticsData.top_diseases.map(d=>d.count),1);
+      document.getElementById('dl').innerHTML=analyticsData.top_diseases.map(d=>`
+        <div class="dbar">
+          <div class="dn" title="${d.disease}">${d.disease}</div>
+          <div class="dbg"><div class="df" style="width:${(d.count/maxD)*100}%"></div></div>
+          <div class="dc">${d.count}</div>
+        </div>
+      `).join('');
+    } else {
+      document.getElementById('dl').innerHTML='<div style="color:#3d6b4a;font-size:13px;padding:10px 0">No diagnosis data yet — share the app with farmers!</div>';
+    }
+
+    // Categories
+    if(analyticsData.diagnosis_by_category){
+      const cats=Object.entries(analyticsData.diagnosis_by_category);
+      const total=cats.reduce((s,[,v])=>s+v,0)||1;
+      document.getElementById('cl').innerHTML=cats.length>0?cats.map(([cat,count])=>`
+        <div class="dbar">
+          <div class="dn">${CAT_EMOJI[cat]||'🌿'} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</div>
+          <div class="dbg"><div class="df" style="width:${(count/total)*100}%"></div></div>
+          <div class="dc">${count}</div>
+        </div>
+      `).join(''):'<div style="color:#3d6b4a;font-size:13px">No data yet</div>';
+    }
+
+    // Languages
+    if(analyticsData.diagnosis_by_language){
+      const langs=Object.entries(analyticsData.diagnosis_by_language);
+      const totalL=langs.reduce((s,[,v])=>s+v,0)||1;
+      document.getElementById('ll').innerHTML=langs.length>0?langs.map(([lang,count])=>`
+        <div class="dbar">
+          <div class="dn">${LANG_NAMES[lang]||lang}</div>
+          <div class="dbg"><div class="df" style="width:${(count/totalL)*100}%"></div></div>
+          <div class="dc">${count}</div>
+        </div>
+      `).join(''):'<div style="color:#3d6b4a;font-size:13px">No data yet</div>';
+    }
+
+    // Severity
+    if(analyticsData.diagnosis_by_severity){
+      const sevs=Object.entries(analyticsData.diagnosis_by_severity);
+      const totalS=sevs.reduce((s,[,v])=>s+v,0)||1;
+      document.getElementById('sevl').innerHTML=sevs.length>0?sevs.map(([sev,count])=>`
+        <div class="dbar">
+          <div class="dn" style="color:${SEV_COLOR[sev]||'#b7e4c7'}">${sev.charAt(0).toUpperCase()+sev.slice(1)}</div>
+          <div class="dbg"><div class="df" style="width:${(count/totalS)*100}%;background:${SEV_COLOR[sev]||'var(--lime)'}"></div></div>
+          <div class="dc">${count}</div>
+        </div>
+      `).join(''):'<div style="color:#3d6b4a;font-size:13px">No data yet</div>';
+    }
+  }
+
   // Registrations
   try{
-    const rd=await(await fetch(`${B}/api/registrations`,{headers:{'X-Admin-Key':K}})).json();
-    document.getElementById('sr').textContent=rd.total||0;
+    const rd=await fetch(`${B}/api/registrations`,{headers:{'X-Admin-Key':K}}).then(r=>r.json());
     document.getElementById('rc').textContent=`${rd.pending||0} pending · ${rd.approved||0} approved`;
     const regs=rd.registrations||[];
     document.getElementById('rl').innerHTML=regs.length===0
-      ?'<div style="text-align:center;color:#3d6b4a;padding:20px;font-size:13px">No registrations yet. Share the app with dealers and vets!</div>'
+      ?'<div style="text-align:center;color:#3d6b4a;padding:20px;font-size:13px">No registrations yet. Share the app with dealers and vets to get them to register.</div>'
       :regs.map(r=>`
         <div class="rrow">
           <div class="rtag ${r.type==='vet'?'v':'d'}">${r.type==='vet'?'🐄 Vet':'🏪 Dealer'}</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.businessName}</div>
-            <div style="font-size:11px;color:#3d6b4a">📍 ${r.stateLGA} · ${(r.services||'').slice(0,30)}...</div>
+            <div style="font-size:11px;color:#3d6b4a">📍 ${r.stateLGA} &nbsp;·&nbsp; ${(r.services||'').slice(0,40)}${r.services?.length>40?'...':''}</div>
           </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:12px;color:#6ee569">${r.contactPhone||r.phone||''}</div>
+          <div style="text-align:right;flex-shrink:0;margin:0 8px">
+            <div style="font-size:12px;color:var(--lime)">${r.contactPhone||r.phone||''}</div>
             <div style="font-size:10px;color:#3d6b4a">${new Date(r.submittedAt).toLocaleDateString('en-NG')}</div>
           </div>
           <button class="apbtn ${r.approved?'done':''}" onclick="approveReg('${r.id}',this)" ${r.approved?'disabled':''}>
-            ${r.approved?'✅ Done':'Approve'}
+            ${r.approved?'✅ Approved':'Approve'}
           </button>
         </div>
       `).join('');
   }catch(e){
     document.getElementById('rl').innerHTML='<div style="color:#f87171;font-size:12px">❌ Could not load registrations. Check your admin key.</div>';
   }
-
-  // Top diseases (you can wire this to real data later)
-  const diseases=[
-    {n:'Cassava Mosaic',c:24},{n:'Newcastle Disease',c:18},{n:'Tomato Blight',c:14},
-    {n:'Gumboro Disease',c:11},{n:'Columnaris (Fish)',c:8},{n:'PPR (Goats)',c:6},{n:'Maize Streak',c:5}
-  ];
-  const mx=Math.max(...diseases.map(d=>d.c));
-  document.getElementById('dl').innerHTML=diseases.map(d=>`
-    <div class="dbar">
-      <div class="dn">${d.n}</div>
-      <div class="dbg"><div class="df" style="width:${(d.c/mx)*100}%"></div></div>
-      <div class="dc">${d.c}</div>
-    </div>
-  `).join('');
-
-  // States
-  const states=['Lagos','Kano','Oyo','Anambra','FCT','Delta','Benue','Rivers','Plateau','Kaduna'];
-  document.getElementById('sll').innerHTML=states.map(s=>`<span class="spill">📍 ${s}</span>`).join('');
 }
 
 async function approveReg(id,btn){
   try{
     const r=await fetch(`${B}/api/registrations/${id}/approve`,{method:'POST',headers:{'X-Admin-Key':K}});
-    if(r.ok){btn.textContent='✅ Done';btn.classList.add('done');btn.disabled=true;}
+    if(r.ok){btn.textContent='✅ Approved';btn.classList.add('done');btn.disabled=true;}
+    else alert('Could not approve — check admin key');
   }catch(e){alert('Could not approve. Check connection.');}
 }
 
+function exportData(type){
+  if(!B||!K){alert('Please log in first');return;}
+  const url=`${B}/api/export/${type}?key=${encodeURIComponent(K)}`;
+  // Open download with admin key in header using a form trick
+  const link=document.createElement('a');
+  link.href=`${B}/api/export/${type}`;
+  // Add key as query param for download
+  fetch(`${B}/api/export/${type}`,{headers:{'X-Admin-Key':K}})
+    .then(r=>r.blob())
+    .then(blob=>{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`agrodoc_${type}_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showExportMsg(`✅ ${type} data downloaded successfully`);
+    })
+    .catch(()=>showExportMsg('❌ Could not download. Check your connection.'));
+}
+
+function copyPowerBI(){
+  if(!B||!K){alert('Please log in first');return;}
+  const url=`${B}/api/powerbi`;
+  navigator.clipboard.writeText(url).then(()=>{
+    showExportMsg(`✅ Power BI URL copied! Paste it in Power BI → Get Data → Web. Remember to add X-Admin-Key header: ${K}`);
+  }).catch(()=>{
+    prompt('Copy this Power BI URL:',url);
+  });
+}
+
+function showExportMsg(msg){
+  const el=document.getElementById('export-msg');
+  el.textContent=msg;
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',5000);
+}
+
+// Auto-fill backend URL if saved
 window.onload=()=>{
   const saved=localStorage.getItem('adab');
-  if(saved)document.getElementById('bu').value=saved;
+  if(saved) document.getElementById('bu').value=saved;
 };
 </script>
 </body>
