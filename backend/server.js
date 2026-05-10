@@ -15,12 +15,13 @@ const helmet     = require("helmet");
 const rateLimit  = require("express-rate-limit");
 const multer     = require("multer");
 const crypto     = require("crypto");
+const path       = require("path");
 const { diagnose, tryOfflineCache, CACHE_VERSION } = require("./ai");
 const { handleWhatsAppMessage, isWhatsAppRateLimited, getRegistrations } = require("./whatsapp");
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const APP_KEY = process.env.APP_KEY; // FIX #1
+const APP_KEY = process.env.APP_KEY;
 
 // ── SECURITY + NDPR HEADERS ───────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy:false, crossOriginEmbedderPolicy:false }));
@@ -28,10 +29,16 @@ app.use((req,res,next)=>{
   res.setHeader("X-Data-Policy","NDPR-2019-Compliant");
   res.setHeader("X-Content-Type-Options","nosniff");
   res.setHeader("X-Frame-Options","DENY");
-  res.setHeader("Strict-Transport-Security","max-age=31536000; includeSubDomains"); // FIX #4
-  res.setHeader("X-Cache-Version", CACHE_VERSION); // FIX #8
+  res.setHeader("Strict-Transport-Security","max-age=31536000; includeSubDomains");
+  res.setHeader("X-Cache-Version", CACHE_VERSION);
   next();
 });
+
+// ── SERVE ADMIN DASHBOARD ─────────────────────────────────────────────────────
+app.get("/admin", (req,res) => res.sendFile(path.join(__dirname, "admin.html")));
+app.get("/admin.html", (req,res) => res.sendFile(path.join(__dirname, "admin.html")));
+app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
+app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
 const ALLOWED = (process.env.ALLOWED_ORIGINS||"*").split(",").map(s=>s.trim());
 app.use(cors({ origin:(origin,cb)=>(!origin||ALLOWED.includes("*")||ALLOWED.includes(origin))?cb(null,true):cb(new Error("CORS blocked")), methods:["GET","POST"], allowedHeaders:["Content-Type","X-Session-Token","X-App-Key"] }));
