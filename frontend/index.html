@@ -393,32 +393,27 @@ function AgroDocAI() {
     }
 
     try {
-      const form = new FormData();
-      if (imageBase64) {
-        // Convert base64 to blob without using fetch() on data: URL
-        const byteString = atob(imageBase64);
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-        const blob = new Blob([ab], { type: "image/jpeg" });
-        form.append("image", blob, "farm.jpg");
-      }
-      form.append("text",     text.trim() || `Analyse this ${category} for disease or health issue.`);
-      form.append("lang",     lang);
-      form.append("mode",     mode);
-      form.append("category", category);
+    try {
+      // Send as JSON with base64 image — avoids all FormData/multipart issues
+      const payload = {
+        text:     text.trim() || `Analyse this ${category} for disease or health issue.`,
+        lang,
+        mode,
+        category,
+      };
+      if (imageBase64) payload.imageBase64 = imageBase64;
 
-      // 30 second timeout for image uploads
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), 35000);
 
       const res = await fetch(`${BACKEND_URL}/api/diagnose`, {
         method:  "POST",
         headers: {
+          "Content-Type":    "application/json",
           "X-Session-Token": getUserId(),
           "X-App-Key":       APP_KEY,
         },
-        body: form,
+        body: JSON.stringify(payload),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -437,7 +432,7 @@ function AgroDocAI() {
       console.error("Diagnosis error:", err.message);
       const key = text && Object.keys(OFFLINE_CACHE).find(k => text.toLowerCase().includes(k.split(" ")[0]));
       if (key) { const c={...OFFLINE_CACHE[key],date:new Date().toLocaleDateString(),image,lang,offline:true}; setResult(c); setHistory(p=>[c,...p.slice(0,19)]); }
-      else setResult({ disease:"Connection Error", description: isOffline ? "You are offline. Type a disease name for cached results." : err.name==="AbortError" ? "Request timed out — your image may be too large. Try a smaller photo." : "Could not reach server. Check your connection and try again.", treatment:[], pesticide:"", prevention:"", confidence:"low", subject:"", severity:"mild", disclaimer:"", category });
+      else setResult({ disease:"Connection Error", description: err.name==="AbortError" ? "Request timed out — please try again with a text description." : isOffline ? "You are offline. Type symptoms for cached results." : "Could not reach server. Please try again.", treatment:[], pesticide:"", prevention:"", confidence:"low", subject:"", severity:"mild", disclaimer:"", category });
     }
     setLoading(false);
   }, [imageBase64, text, lang, mode, image, isOffline, category]);
