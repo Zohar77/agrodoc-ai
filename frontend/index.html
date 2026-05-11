@@ -39,11 +39,10 @@ const { useState, useRef, useEffect, useCallback } = React;
 // CONFIGURATION — UPDATE BOTH VALUES AFTER YOU DEPLOY ON RENDER
 // ─────────────────────────────────────────────────────────────────────────────
 // Step 1: Replace with your actual Render URL after deployment
-const BACKEND_URL = "https://agrodoc-ai.onrender.com"; // ← CHANGE THIS
+const BACKEND_URL = "https://agrodoc-ai.onrender.com";
 
-// Step 2: Must match APP_KEY in your backend .env file exactly
-// This is the shared secret that locks your API — never share it publicly
-const APP_KEY = "agrodoc2026secretkey123456789abc"; // ← CHANGE THIS TO MATCH YOUR .env APP_KEY
+// APP_KEY — must match APP_KEY in your Render environment variables
+const APP_KEY = localStorage.getItem("agrodoc_appkey") || "agrodoc2026secretkey123456789abc";
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -394,10 +393,14 @@ function AgroDocAI() {
     }
 
     try {
-      // Build form data — multipart so we can send both image and text safely
       const form = new FormData();
       if (imageBase64) {
-        const blob = await fetch(`data:image/jpeg;base64,${imageBase64}`).then(r => r.blob());
+        // Convert base64 to blob without using fetch() on data: URL
+        const byteString = atob(imageBase64);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+        const blob = new Blob([ab], { type: "image/jpeg" });
         form.append("image", blob, "farm.jpg");
       }
       form.append("text",     text.trim() || `Analyse this ${category} for disease or health issue.`);
@@ -405,14 +408,20 @@ function AgroDocAI() {
       form.append("mode",     mode);
       form.append("category", category);
 
+      // 30 second timeout for image uploads
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
       const res = await fetch(`${BACKEND_URL}/api/diagnose`, {
         method:  "POST",
         headers: {
-          "X-Session-Token": getUserId(),  // Fix #3 — anonymous session tracking
-          "X-App-Key":       APP_KEY,      // Fix #1 — locks endpoint to your app only
+          "X-Session-Token": getUserId(),
+          "X-App-Key":       APP_KEY,
         },
         body: form,
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -423,14 +432,12 @@ function AgroDocAI() {
       const entry  = { ...parsed, date: new Date().toLocaleDateString(), image, lang, category };
       setResult(entry);
       setHistory(p => [entry, ...p.slice(0, 19)]);
-      // Show feedback prompt after 3 seconds
       setTimeout(() => setShowFeedback(true), 3000);
     } catch (err) {
       console.error("Diagnosis error:", err.message);
-      // Local cache fallback
       const key = text && Object.keys(OFFLINE_CACHE).find(k => text.toLowerCase().includes(k.split(" ")[0]));
       if (key) { const c={...OFFLINE_CACHE[key],date:new Date().toLocaleDateString(),image,lang,offline:true}; setResult(c); setHistory(p=>[c,...p.slice(0,19)]); }
-      else setResult({ disease:"Connection Error", description: isOffline ? "You are offline. Type a disease name for cached results." : "Could not reach server. Please check your connection and try again.", treatment:[], pesticide:"", prevention:"", confidence:"low", subject:"", severity:"mild", disclaimer:"", category });
+      else setResult({ disease:"Connection Error", description: isOffline ? "You are offline. Type a disease name for cached results." : err.name==="AbortError" ? "Request timed out — your image may be too large. Try a smaller photo." : "Could not reach server. Check your connection and try again.", treatment:[], pesticide:"", prevention:"", confidence:"low", subject:"", severity:"mild", disclaimer:"", category });
     }
     setLoading(false);
   }, [imageBase64, text, lang, mode, image, isOffline, category]);
