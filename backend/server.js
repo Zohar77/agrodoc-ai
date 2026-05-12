@@ -40,8 +40,16 @@ app.get("/admin.html", (req,res) => res.sendFile(path.join(__dirname, "admin.htm
 app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
-const ALLOWED = (process.env.ALLOWED_ORIGINS||"*").split(",").map(s=>s.trim());
-app.use(cors({ origin:(origin,cb)=>(!origin||ALLOWED.includes("*")||ALLOWED.includes(origin))?cb(null,true):cb(new Error("CORS blocked")), methods:["GET","POST"], allowedHeaders:["Content-Type","X-Session-Token","X-App-Key"] }));
+const ALLOWED = [...(process.env.ALLOWED_ORIGINS||"*").split(",").map(s=>s.trim()), "https://agrodoc-ai.vercel.app", "https://agrodoc-ai-y943.vercel.app"];
+const CORS_OPTIONS = {
+  origin:(origin,cb)=>(!origin||ALLOWED.includes("*")||ALLOWED.includes(origin))?cb(null,true):cb(new Error("CORS blocked")),
+  methods:["GET","POST","OPTIONS"],
+  allowedHeaders:["Content-Type","X-Session-Token","X-App-Key","X-Admin-Key","Authorization"],
+  credentials:true,
+  optionsSuccessStatus:200,
+};
+app.use(cors(CORS_OPTIONS));
+app.options("*", cors(CORS_OPTIONS)); // Handle preflight for all routes
 app.use(express.json({limit:"10mb"}));
 app.use(express.urlencoded({extended:true}));
 
