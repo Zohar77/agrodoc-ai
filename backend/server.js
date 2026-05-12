@@ -154,7 +154,6 @@ app.post("/api/diagnose",requireAppKey,diagnoseLimiter,express.json({limit:"15mb
     let text="",lang="en",mode="farmer",category="crops";
 
     if(req.file){
-      // Multipart form upload
       imageBase64=req.file.buffer.toString("base64");
       imageType=req.file.mimetype;
       text=sanitiseText(req.body.text);
@@ -162,7 +161,6 @@ app.post("/api/diagnose",requireAppKey,diagnoseLimiter,express.json({limit:"15mb
       mode=sanitiseMode(req.body.mode);
       category=sanitiseCategory(req.body.category);
     } else if(req.body?.imageBase64){
-      // JSON base64 upload
       imageBase64=req.body.imageBase64.replace(/^data:image\/\w+;base64,/,"");
       imageType=req.body.imageType||"image/jpeg";
       text=sanitiseText(req.body.text);
@@ -170,19 +168,10 @@ app.post("/api/diagnose",requireAppKey,diagnoseLimiter,express.json({limit:"15mb
       mode=sanitiseMode(req.body.mode);
       category=sanitiseCategory(req.body.category);
     } else {
-      // Text only
-      text=sanitiseText(req.body.text||req.body.prompt);
-      lang=sanitiseLang(req.body.lang);
-      mode=sanitiseMode(req.body.mode);
-      category=sanitiseCategory(req.body.category);
-    }
-    } else {
-      imageBase64=req.body.imageBase64||null;
-      imageType=req.body.imageType||"image/jpeg";
-      text=sanitiseText(req.body.text);          // FIX #3
-      lang=sanitiseLang(req.body.lang);
-      mode=sanitiseMode(req.body.mode);
-      category=sanitiseCategory(req.body.category);
+      text=sanitiseText(req.body?.text||req.body?.prompt);
+      lang=sanitiseLang(req.body?.lang);
+      mode=sanitiseMode(req.body?.mode);
+      category=sanitiseCategory(req.body?.category);
     }
 
     // FIX #3 — Reject empty or suspiciously large inputs
