@@ -42,7 +42,7 @@ const { useState, useRef, useEffect, useCallback } = React;
 const BACKEND_URL = "https://agrodoc-ai.onrender.com";
 
 // APP_KEY — must match APP_KEY in your Render environment variables
-const APP_KEY = localStorage.getItem("agrodoc_appkey") || "agrodocai2026master";
+const APP_KEY = localStorage.getItem("agrodoc_appkey") || "agrodoc2026secretkey123456789abc";
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -392,7 +392,6 @@ function AgroDocAI() {
       if (key) { const c={...OFFLINE_CACHE[key],date:new Date().toLocaleDateString(),image,lang,offline:true}; setResult(c); setHistory(p=>[c,...p.slice(0,19)]); setLoading(false); return; }
     }
 
-    try {
     try {
       // Send as JSON with base64 image — avoids all FormData/multipart issues
       const payload = {
