@@ -40,9 +40,7 @@ const { useState, useRef, useEffect, useCallback } = React;
 // ─────────────────────────────────────────────────────────────────────────────
 // Step 1: Replace with your actual Render URL after deployment
 const BACKEND_URL = "https://agrodoc-ai.onrender.com";
-
-// APP_KEY — must match APP_KEY in your Render environment variables
-const APP_KEY = localStorage.getItem("agrodoc_appkey") || "agrodoc2026secretkey123456789abc";
+const APP_KEY = "agrodocai2026master";
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -428,10 +426,15 @@ function AgroDocAI() {
       setHistory(p => [entry, ...p.slice(0, 19)]);
       setTimeout(() => setShowFeedback(true), 3000);
     } catch (err) {
-      console.error("Diagnosis error:", err.message);
+      console.error("=== DIAGNOSIS ERROR ===");
+      console.error("Error name:", err.name);
+      console.error("Error message:", err.message);
+      console.error("Has image:", !!imageBase64);
+      console.error("Image size:", imageBase64 ? imageBase64.length : 0);
+      console.error("======================");
       const key = text && Object.keys(OFFLINE_CACHE).find(k => text.toLowerCase().includes(k.split(" ")[0]));
       if (key) { const c={...OFFLINE_CACHE[key],date:new Date().toLocaleDateString(),image,lang,offline:true}; setResult(c); setHistory(p=>[c,...p.slice(0,19)]); }
-      else setResult({ disease:"Connection Error", description: err.name==="AbortError" ? "Request timed out — please try again with a text description." : isOffline ? "You are offline. Type symptoms for cached results." : "Could not reach server. Please try again.", treatment:[], pesticide:"", prevention:"", confidence:"low", subject:"", severity:"mild", disclaimer:"", category });
+      else setResult({ disease:"Connection Error", description: err.name==="AbortError" ? "Request timed out — please try again with a text description." : isOffline ? "You are offline. Type symptoms for cached results." : `Error: ${err.message}. Check console for details.`, treatment:[], pesticide:"", prevention:"", confidence:"low", subject:"", severity:"mild", disclaimer:"", category });
     }
     setLoading(false);
   }, [imageBase64, text, lang, mode, image, isOffline, category]);
