@@ -599,13 +599,26 @@ If the crop or animal looks healthy: set disease to 'Healthy — No Disease Foun
 // ── MAIN DIAGNOSE FUNCTION ────────────────────────────────────────────────────
 async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", mode="farmer", category="crops" }) {
   const content = [];
-  if (imageBase64) content.push({ type:"image", source:{ type:"base64", media_type:imageType, data:imageBase64 } });
-  content.push({ type:"text", text: text?.trim() || `Please analyse this ${category} and identify any disease, pest, or health problem.` });
+
+  if (imageBase64) {
+    // Ensure valid media type for Anthropic
+    const validTypes = ["image/jpeg","image/png","image/gif","image/webp"];
+    const safeType = validTypes.includes(imageType) ? imageType : "image/jpeg";
+    content.push({
+      type: "image",
+      source: { type:"base64", media_type:safeType, data:imageBase64 }
+    });
+  }
+
+  content.push({
+    type: "text",
+    text: text?.trim() || `Please analyse this ${category} and identify any disease, pest, or health problem.`
+  });
 
   const response = await axios.post(
     "https://api.anthropic.com/v1/messages",
     {
-      model:      "claude-sonnet-4-20250514",
+      model:      "claude-opus-4-5",
       max_tokens: 1400,
       system:     buildSystemPrompt(lang, mode, category),
       messages:   [{ role:"user", content }],
