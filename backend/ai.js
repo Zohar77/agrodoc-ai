@@ -601,7 +601,6 @@ async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", 
   const content = [];
 
   if (imageBase64) {
-    // Ensure valid media type for Anthropic
     const validTypes = ["image/jpeg","image/png","image/gif","image/webp"];
     const safeType = validTypes.includes(imageType) ? imageType : "image/jpeg";
     content.push({
@@ -615,27 +614,34 @@ async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", 
     text: text?.trim() || `Please analyse this ${category} and identify any disease, pest, or health problem.`
   });
 
-  const response = await axios.post(
-    "https://api.anthropic.com/v1/messages",
-    {
-      model:      "claude-opus-4-5",
-      max_tokens: 1400,
-      system:     buildSystemPrompt(lang, mode, category),
-      messages:   [{ role:"user", content }],
-    },
-    {
-      headers: {
-        "x-api-key":         process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type":      "application/json",
+  try {
+    const response = await axios.post(
+      "https://api.anthropic.com/v1/messages",
+      {
+        model:      "claude-sonnet-4-6",
+        max_tokens: 1400,
+        system:     buildSystemPrompt(lang, mode, category),
+        messages:   [{ role:"user", content }],
       },
-      timeout: 30000,
-    }
-  );
+      {
+        headers: {
+          "x-api-key":         process.env.ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "content-type":      "application/json",
+        },
+        timeout: 30000,
+      }
+    );
 
-  const raw   = response.data.content?.map(b => b.text || "").join("").trim();
-  const clean = raw.replace(/```json|```/g, "").trim();
-  return JSON.parse(clean);
+    const raw   = response.data.content?.map(b => b.text || "").join("").trim();
+    const clean = raw.replace(/```json|```/g, "").trim();
+    return JSON.parse(clean);
+  } catch (err) {
+    // Log the actual Anthropic error for debugging
+    const errData = err.response?.data;
+    console.error("Anthropic API error:", JSON.stringify(errData || err.message));
+    throw new Error(errData?.error?.message || err.message || "AI diagnosis failed");
+  }
 }
 
 module.exports = { diagnose, tryOfflineCache, OFFLINE_CACHE, CACHE_VERSION };
