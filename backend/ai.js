@@ -637,10 +637,18 @@ async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", 
     const clean = raw.replace(/```json|```/g, "").trim();
     return JSON.parse(clean);
   } catch (err) {
-    // Log the actual Anthropic error for debugging
-    const errData = err.response?.data;
-    console.error("Anthropic API error:", JSON.stringify(errData || err.message));
-    throw new Error(errData?.error?.message || err.message || "AI diagnosis failed");
+    const status  = err.response?.status;
+    const errBody = err.response?.data;
+    console.error("=== ANTHROPIC ERROR ===");
+    console.error("Status:", status);
+    console.error("Error body:", JSON.stringify(errBody));
+    console.error("Has image:", !!imageBase64);
+    console.error("Image size:", imageBase64?.length || 0);
+    console.error("Image type:", imageType);
+    console.error("Model:", "claude-sonnet-4-6");
+    console.error("======================");
+    const msg = errBody?.error?.message || err.message || "AI diagnosis failed";
+    throw new Error(msg);
   }
 }
 
