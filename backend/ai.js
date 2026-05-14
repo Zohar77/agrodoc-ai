@@ -611,7 +611,9 @@ async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", 
 
   content.push({
     type: "text",
-    text: text?.trim() || `Please analyse this ${category} and identify any disease, pest, or health problem.`
+    text: (text?.trim() && text.trim().length > 0)
+      ? text.trim()
+      : `You are analysing a ${category} farm photo. Identify any disease, pest damage, or health problem visible. If the ${category} looks healthy, say so and give care tips.`
   });
 
   try {
