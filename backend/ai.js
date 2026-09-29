@@ -2,7 +2,7 @@
 // UPDATED: 30 diseases fully cached, detailed prescriptions, simplified language
 const axios = require("axios");
 
-const CACHE_VERSION = "2026.05.v4";
+const CACHE_VERSION = "2026.09.v5";
 
 const LANG_PROMPTS = {
   en:  "Respond in clear simple English a farmer can understand.",
@@ -547,6 +547,144 @@ const OFFLINE_CACHE = {
     confidence:"high",
     disclaimer:"⚠️ AgroDoc AI is advisory only. LSD is notifiable in Nigeria — report to your state veterinary office. Contact your vet for correct vaccine administration.",
     whatsappSummary:"Your cattle have Lumpy Skin Disease from biting insects. Isolate sick animals, treat skin lumps with antiseptic, vaccinate healthy cattle now, and report to your state vet office."
+  },
+
+  // ══ ADDITIONAL CROPS ════════════════════════════════════════════════════════
+
+  "oil palm": {
+    category:"crops", disease:"Oil Palm Bunch Rot", subject:"Oil Palm",
+    severity:"moderate",
+    description:"The rotting and blackening of your oil palm fruit bunches before harvest is Bunch Rot — a fungal disease that thrives in wet conditions and causes serious yield loss.",
+    treatment:[
+      "Remove all rotting bunches immediately — cut them off and burn them away from the plantation",
+      "Improve drainage around every palm tree — dig channels to prevent waterlogging",
+      "Spray Copper Oxychloride on remaining healthy bunches — mix 30g in 15 litres of water",
+      "Clear weeds and dead fronds from around the base of trees — these hold moisture"
+    ],
+    pesticide:"Copper Oxychloride — 30g in 15L water, spray every 3 weeks during rainy season",
+    prevention:"Harvest bunches promptly when ripe. Maintain good drainage. Prune dead fronds regularly.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only. Contact NIFOR (Nigerian Institute for Oil Palm Research) Benin City for technical support.",
+    whatsappSummary:"Your oil palm has Bunch Rot fungus. Remove all rotting bunches immediately and spray Copper Oxychloride on healthy ones. Improve drainage around trees."
+  },
+
+  "sweet potato": {
+    category:"crops", disease:"Sweet Potato Virus Disease (SPVD)", subject:"Sweet Potato",
+    severity:"severe",
+    description:"The stunted growth, purple or yellow discolouration and distorted leaves on your sweet potato are signs of Sweet Potato Virus Disease — spread by whitefly insects. It can reduce yield by 80%.",
+    treatment:[
+      "Remove and destroy all infected vines immediately — pull them out with roots and burn them",
+      "Spray Confidor (Imidacloprid) on all remaining healthy plants — mix 10ml in 15 litres of water",
+      "Replant using certified virus-free vines from IITA or state ADP offices",
+      "Do not replant sweet potato in the same plot this season"
+    ],
+    pesticide:"Confidor (Imidacloprid) — 10ml in 15L water, spray every 7 days for 3 weeks",
+    prevention:"Always use certified virus-free vines. Control whiteflies from day one. Inspect plants weekly.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only.",
+    whatsappSummary:"Your sweet potato has Virus Disease from whiteflies. Remove all infected plants immediately, spray Confidor on healthy ones, and replant with certified clean vines."
+  },
+
+  "soybean": {
+    category:"crops", disease:"Soybean Rust (Phakopsora pachyrhizi)", subject:"Soybean",
+    severity:"severe",
+    description:"The small reddish-brown pustules on the underside of your soybean leaves that produce orange powder when touched are Soybean Rust — a highly destructive fungal disease that spreads rapidly in warm humid weather.",
+    treatment:[
+      "Spray Tilt (Propiconazole) immediately — mix 10ml in 15 litres of water. Spray the undersides of leaves thoroughly",
+      "Spray every 14 days until dry weather returns",
+      "Harvest early if infection is severe — do not wait for ideal maturity",
+      "Remove and destroy heavily infected plants"
+    ],
+    pesticide:"Tilt (Propiconazole) — 10ml in 15L water every 14 days. Amistar (Azoxystrobin) is an effective alternative",
+    prevention:"Plant resistant varieties like TGX 1448-2E. Avoid late planting. Ensure good spacing for air circulation.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only.",
+    whatsappSummary:"Your soybean has Rust disease. Spray Tilt (Propiconazole) on the undersides of leaves immediately and repeat every 14 days."
+  },
+
+  "sorghum": {
+    category:"crops", disease:"Covered Kernel Smut", subject:"Sorghum/Guinea Corn",
+    severity:"moderate",
+    description:"The black powdery masses replacing the grain kernels in your sorghum head are Covered Kernel Smut — a seed-borne fungal disease that replaces healthy grain with fungal spores and ruins your harvest.",
+    treatment:[
+      "Remove and burn all infected heads immediately — do not thresh them as this spreads spores",
+      "For next planting — treat seeds with Thiram fungicide — soak in solution of 3g per kg of seed for 30 minutes then dry before planting",
+      "Plant smut-resistant varieties from your state ADP office",
+      "Rotate with cowpea or groundnut next season"
+    ],
+    pesticide:"Thiram seed treatment — 3g per kg of seed. Apron Star (metalaxyl + thiamethoxam) is also effective as seed dressing",
+    prevention:"Always treat seeds before planting. Use certified smut-resistant varieties. Rotate crops every season.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only.",
+    whatsappSummary:"Your sorghum has Kernel Smut. Remove and burn all infected heads immediately. Next season treat your seeds with Thiram before planting."
+  },
+
+  "ginger": {
+    category:"crops", disease:"Ginger Rhizome Rot", subject:"Ginger",
+    severity:"severe",
+    description:"The yellowing leaves, wilting shoots, and soft rotting rhizomes at the base of your ginger plants are Rhizome Rot — caused by Pythium or Fusarium fungi that thrive in waterlogged soil. It can destroy your entire ginger crop.",
+    treatment:[
+      "Dig up and remove all infected rhizomes immediately — the rot spreads underground through soil water",
+      "Improve drainage urgently — create ridges or raised beds so water flows away from roots",
+      "Drench the soil around healthy plants with Ridomil Gold MZ — mix 25g in 15 litres of water and pour slowly around the base",
+      "Do not replant ginger in infected soil for at least 2 years"
+    ],
+    pesticide:"Ridomil Gold MZ — 25g in 15L water as soil drench, repeat every 21 days",
+    prevention:"Plant on raised beds only. Use disease-free rhizomes from trusted sources. Never plant in previously infected soil.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only.",
+    whatsappSummary:"Your ginger has Rhizome Rot from waterlogged soil. Remove all infected rhizomes, improve drainage immediately, and drench soil with Ridomil Gold. This spreads fast."
+  },
+
+  "onion": {
+    category:"crops", disease:"Purple Blotch (Alternaria)", subject:"Onion",
+    severity:"moderate",
+    description:"The purple-centred lesions with yellow borders on your onion leaves are Purple Blotch — a fungal disease that spreads in warm humid conditions and causes premature leaf die-back and poor bulb development.",
+    treatment:[
+      "Remove and destroy all heavily infected leaves — cut them off at the base",
+      "Spray Dithane M-45 (Mancozeb) — mix 30g in 15 litres of water every 7 to 10 days",
+      "Water at the base only — never overhead. Wet leaves spread the disease 3 times faster",
+      "Improve spacing between plants to allow air circulation"
+    ],
+    pesticide:"Dithane M-45 (Mancozeb) — 30g in 15L water every 7-10 days. Tilt (Propiconazole) at 10ml in 15L for severe cases",
+    prevention:"Use certified onion seeds. Avoid poorly drained areas. Rotate with non-onion crops every season.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only.",
+    whatsappSummary:"Your onions have Purple Blotch fungus. Remove infected leaves and spray Dithane M-45 every 7 days. Stop watering from above — water only at the base."
+  },
+
+  "cucumber": {
+    category:"crops", disease:"Cucumber Mosaic Virus", subject:"Cucumber/Watermelon",
+    severity:"moderate",
+    description:"The yellow-green mosaic pattern on your cucumber or watermelon leaves combined with stunted growth and distorted fruits are signs of Cucumber Mosaic Virus spread by aphids.",
+    treatment:[
+      "Remove all infected plants immediately and burn them — there is no cure once infected",
+      "Spray Actara (Thiamethoxam) on healthy plants to kill aphids — mix 5g in 15 litres of water",
+      "Set up yellow sticky traps around your farm — aphids are attracted to yellow colour",
+      "Replant using virus-tolerant varieties from certified agro-dealers"
+    ],
+    pesticide:"Actara (Thiamethoxam) — 5g in 15L water every 7 days. Dimethoate 40ml in 15L is a cheaper alternative",
+    prevention:"Control aphids from day one. Remove weeds around the farm. Use reflective mulch to repel aphids.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only.",
+    whatsappSummary:"Your cucumber/watermelon has Mosaic Virus from aphids. Remove all infected plants immediately and spray Actara on healthy ones."
+  },
+
+  "okra": {
+    category:"crops", disease:"Okra Yellow Vein Mosaic Virus", subject:"Okra",
+    severity:"severe",
+    description:"The yellow veins and yellow-green mosaic spreading across your okra leaves combined with stunted plants and poor pod development are signs of Yellow Vein Mosaic Virus — spread by whitefly insects.",
+    treatment:[
+      "Remove and destroy all infected plants immediately — pull out roots and burn",
+      "Spray Confidor (Imidacloprid) on all remaining healthy plants — mix 10ml in 15 litres of water",
+      "Replant with resistant okra varieties — NHAe 47-4 or Clemson Spineless from NIHORT",
+      "Plant next crop early — before peak whitefly season"
+    ],
+    pesticide:"Confidor (Imidacloprid) — 10ml in 15L water, spray every 7 days",
+    prevention:"Plant early in the season. Use resistant varieties always. Remove infected plants immediately when spotted.",
+    confidence:"high",
+    disclaimer:"AgroDoc AI is advisory only. Contact NIHORT Ibadan for resistant variety supply.",
+    whatsappSummary:"Your okra has Yellow Vein Mosaic Virus from whiteflies. Remove all infected plants now and spray Confidor on healthy ones. Replant with resistant varieties."
   },
 
 };
