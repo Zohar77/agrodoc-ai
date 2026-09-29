@@ -443,10 +443,47 @@ function AgroDocAI() {
   const speak = () => {
     if (!result) return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance([result.disease, result.description, ...(result.treatment||[])].join(". "));
-    utt.lang = LANGUAGES[lang].code; utt.rate = 0.88;
+
+    // Build the text to read
+    const textToRead = [
+      result.disease,
+      result.description,
+      ...(result.treatment||[])
+    ].join(". ");
+
+    const utt = new SpeechSynthesisUtterance(textToRead);
+    utt.rate = 0.85;
+    utt.pitch = 1;
+    utt.volume = 1;
+
+    // Try to find the best voice for the selected language
+    const voices = window.speechSynthesis.getVoices();
+    const langCode = LANGUAGES[lang]?.code || "en-NG";
+
+    // Try exact match first, then partial match, then any English voice
+    let selectedVoice =
+      voices.find(v => v.lang === langCode) ||
+      voices.find(v => v.lang.startsWith(langCode.split("-")[0])) ||
+      voices.find(v => v.lang.startsWith("en")) ||
+      voices[0];
+
+    if (selectedVoice) utt.voice = selectedVoice;
+    utt.lang = selectedVoice?.lang || langCode;
+
+    // If language is not English — read a short intro in English first
+    // then the diagnosis (since most phones only have English TTS)
+    if (lang !== "en" && lang !== "pcm" && !voices.find(v => v.lang.startsWith(langCode.split("-")[0]))) {
+      // Phone does not have this language voice — notify farmer
+      showToast(`⚠️ ${LANGUAGES[lang].label} voice not available on this device — reading in English`);
+      utt.lang = "en-NG";
+    }
+
     utt.onend = () => setSpeaking(false);
-    setSpeaking(true); window.speechSynthesis.speak(utt);
+    utt.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+
+    // Some browsers need a tiny delay before speaking
+    setTimeout(() => window.speechSynthesis.speak(utt), 100);
   };
 
   // ── WHATSAPP ────────────────────────────────────────────────────────────────
