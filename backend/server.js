@@ -40,7 +40,13 @@ app.get("/admin.html", (req,res) => res.sendFile(path.join(__dirname, "admin.htm
 app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
-const ALLOWED = [...(process.env.ALLOWED_ORIGINS||"*").split(",").map(s=>s.trim()), "https://agrodoc-ai.vercel.app", "https://agrodoc-ai-y943.vercel.app"];
+const ALLOWED = [
+  "https://agrodoc-ai.vercel.app",
+  "https://agrodoc-ai-y943.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",").map(s=>s.trim()) : ["*"]),
+];
 const CORS_OPTIONS = {
   origin:(origin,cb)=>(!origin||ALLOWED.includes("*")||ALLOWED.includes(origin))?cb(null,true):cb(new Error("CORS blocked")),
   methods:["GET","POST","OPTIONS"],
