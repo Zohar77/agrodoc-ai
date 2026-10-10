@@ -1307,10 +1307,23 @@ function AgroDocAI() {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(AgroDocAI));
-setTimeout(()=>{
+// Force remove loading screen after 5 seconds even if there is an error
+function removeLoader() {
   const l=document.getElementById('ld');
   if(l){l.style.transition='opacity .4s';l.style.opacity='0';setTimeout(()=>l.remove(),400);}
-},1200);
+}
+setTimeout(removeLoader, 1200);
+setTimeout(removeLoader, 5000); // Force remove if still showing
+
+// Catch any errors and show them instead of blank screen
+window.onerror = function(msg, src, line) {
+  removeLoader();
+  const r = document.getElementById('root');
+  if(r && !r.innerHTML) {
+    r.innerHTML = '<div style="color:#6ee569;font-family:sans-serif;padding:40px 20px;text-align:center"><div style="font-size:48px;margin-bottom:16px">🌿</div><div style="font-size:20px;font-weight:800;margin-bottom:8px">AgroDoc AI</div><div style="font-size:13px;color:#f87171;margin-bottom:20px">App Error: ' + msg + ' (line ' + line + ')</div><a href="https://agrodoc-ai.vercel.app" style="color:#6ee569">Tap to reload</a></div>';
+  }
+  return false;
+};
 </script>
 </body>
 </html>
