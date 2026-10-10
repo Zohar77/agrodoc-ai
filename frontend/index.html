@@ -497,9 +497,24 @@ function AgroDocAI() {
   // ── FILE HANDLER ─────────────────────────────────────────────────────────────
   const handleFile = (file) => {
     if (!file) return;
-    const img = new Image(), canvas = document.createElement("canvas");
-    img.onload = () => { const s=Math.min(1,900/img.width); canvas.width=img.width*s; canvas.height=img.height*s; canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height); const c=canvas.toDataURL("image/jpeg",0.82); setImage(c); setImageBase64(c.split(",")[1]); };
-    img.src = URL.createObjectURL(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        // Max 600px, quality 0.6 — keeps image under 150KB which sends reliably on Nigerian mobile data
+        const MAX = 600;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressed = canvas.toDataURL("image/jpeg", 0.60);
+        setImage(compressed);
+        setImageBase64(compressed.split(",")[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   // ── HELPERS ──────────────────────────────────────────────────────────────────
