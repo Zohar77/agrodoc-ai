@@ -274,7 +274,7 @@ let result   = null;
 let speaking = false;
 let history  = JSON.parse(localStorage.getItem("agrodoc_history") || "[]");
 let journal  = JSON.parse(localStorage.getItem("agrodoc_journal") || "[]");
-let location = null;
+let userLocation = null;
 let notifEnabled = Notification.permission === "granted";
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────────
@@ -608,9 +608,9 @@ const WMO = {0:"☀️ Clear",1:"🌤 Mostly Clear",2:"⛅ Partly Cloudy",3:"☁
 function getLocation() {
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
-    location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    fetchWeather(location);
-    fetchShops(location);
+    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    fetchWeather(userLocation);
+    fetchShops(userLocation);
   }, () => showToast("⚠️ Could not get your location"), { timeout:10000 });
 }
 
