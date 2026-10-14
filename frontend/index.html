@@ -157,7 +157,11 @@ body{background:#050e07;color:#e8f5e9;font-family:'Outfit',sans-serif;min-height
         <div style="flex:1;height:1px;background:rgba(110,229,105,.1)"></div>
       </div>
 
-      <textarea class="ta" id="diag-text" rows="3" placeholder="e.g. yellow leaves on my cassava, chicken not eating, fish floating..." style="margin-bottom:12px"></textarea>
+      <textarea class="ta" id="diag-text" rows="3" placeholder="Describe what you see on your farm..." style="margin-bottom:8px"></textarea>
+
+      <!-- Quick tag prompts -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="quick-tags"></div>
+
       <button class="pbtn" id="diag-btn" onclick="diagnose()">🔬 Diagnose Now</button>
 
       <div id="result-area"></div>
@@ -368,6 +372,53 @@ function init() {
   renderHistory();
   renderJournalList();
   updateNotifUI();
+  renderQuickTags();
+  updateOfflineIndicator();
+  window.addEventListener("online",  updateOfflineIndicator);
+  window.addEventListener("offline", updateOfflineIndicator);
+}
+
+// ─── QUICK TAGS ───────────────────────────────────────────────────────────────
+const QUICK_TAGS = {
+  crops:    ["Yellow leaves on cassava", "Maize leaves have streaks", "Tomato fruits rotting", "Rice leaves have brown spots", "Pepper plants wilting"],
+  poultry:  ["Chickens not eating", "Birds dying suddenly", "Watery droppings in flock", "Chicken gasping for air", "Swollen eyes on birds"],
+  fish:     ["Fish floating at surface", "White patches on catfish skin", "Fish not eating", "Dead fish in pond", "Fish gasping at top of water"],
+  livestock:["Goat has sores in mouth", "Cow has skin lumps", "Pig dying suddenly", "Sheep has runny nose", "Cattle losing weight fast"],
+};
+
+function renderQuickTags() {
+  const tags = QUICK_TAGS[category] || QUICK_TAGS.crops;
+  const container = document.getElementById("quick-tags");
+  if (!container) return;
+  container.innerHTML = tags.map(t => `
+    <button onclick="setQuickTag('${t}')" style="background:rgba(110,229,105,.06);border:1px solid rgba(110,229,105,.2);color:#6b9e7e;padding:5px 10px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;transition:all .2s;white-space:nowrap">
+      ${t}
+    </button>`).join("");
+}
+
+function setQuickTag(text) {
+  document.getElementById("diag-text").value = text;
+  document.getElementById("diag-text").focus();
+}
+
+// ─── OFFLINE INDICATOR ────────────────────────────────────────────────────────
+function updateOfflineIndicator() {
+  const isOffline = !navigator.onLine;
+  let indicator = document.getElementById("offline-indicator");
+  if (!indicator) {
+    indicator = document.createElement("div");
+    indicator.id = "offline-indicator";
+    const hdr = document.querySelector(".mode-toggle");
+    if (hdr) hdr.parentNode.insertBefore(indicator, hdr.nextSibling);
+  }
+  if (isOffline) {
+    indicator.style.cssText = "background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:10px;padding:6px 12px;font-size:11px;color:#fb923c;margin-top:8px;display:flex;align-items:center;gap:6px";
+    indicator.innerHTML = "📵 <span>Offline — cached disease results still available</span>";
+  } else {
+    indicator.style.cssText = "background:rgba(110,229,105,.06);border:1px solid rgba(110,229,105,.15);border-radius:10px;padding:6px 12px;font-size:11px;color:#6ee569;margin-top:8px;display:flex;align-items:center;gap:6px";
+    indicator.innerHTML = "🟢 <span>Online — full AI diagnosis available</span>";
+    setTimeout(() => { indicator.style.display = "none"; }, 3000);
+  }
 }
 
 function switchTab(id) {
@@ -400,12 +451,12 @@ function renderImageArea() {
         <div class="uz" onclick="document.getElementById('file-camera').click()" style="flex:1;padding:16px 8px;border-radius:14px">
           <div style="font-size:26px;margin-bottom:5px">📸</div>
           <div style="color:#6ee569;font-weight:700;font-size:12px">Take Photo</div>
-          <div style="font-size:10px;color:#3d6b4a;margin-top:2px">Open camera</div>
+          <div style="font-size:10px;color:#3d6b4a;margin-top:4px;line-height:1.4">Get close to the affected area. Make sure it is clear and in good light.</div>
         </div>
         <div class="uz" onclick="document.getElementById('file-gallery').click()" style="flex:1;padding:16px 8px;border-radius:14px">
           <div style="font-size:26px;margin-bottom:5px">🖼️</div>
           <div style="color:#6ee569;font-weight:700;font-size:12px">Gallery</div>
-          <div style="font-size:10px;color:#3d6b4a;margin-top:2px">Choose photo</div>
+          <div style="font-size:10px;color:#3d6b4a;margin-top:4px;line-height:1.4">Choose a clear, close-up photo from your gallery.</div>
         </div>
       </div>`;
   }
