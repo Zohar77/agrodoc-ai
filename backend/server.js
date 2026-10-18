@@ -37,6 +37,8 @@ app.use((req,res,next)=>{
 // ── SERVE ADMIN DASHBOARD ─────────────────────────────────────────────────────
 app.get("/admin", (req,res) => res.sendFile(path.join(__dirname, "admin.html")));
 app.get("/admin.html", (req,res) => res.sendFile(path.join(__dirname, "admin.html")));
+app.get("/dealer", (req,res) => res.sendFile(path.join(__dirname, "dealer.html")));
+app.get("/dealer.html", (req,res) => res.sendFile(path.join(__dirname, "dealer.html")));
 app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
@@ -328,6 +330,135 @@ app.get("/api/analytics",(req,res)=>{
     total_registrations:getRegistrations().length,
     approved_registrations:getRegistrations().filter(r=>r.approved).length,
   });
+});
+
+// ── DISEASE TREND ALERTS ─────────────────────────────────────────────────────
+// Tracks disease reports by state and triggers alerts when 5+ same disease in 7 days
+const outbreakAlerts = [];
+const subscribedFarmers = []; // {phone, state, lang}
+
+// Subscribe farmer for alerts
+app.post("/api/alerts/subscribe", generalLimiter, express.json(), (req,res) => {
+  const { phone, state, lang="en" } = req.body;
+  if (!phone || !state) return res.status(400).json({ error:"phone and state required" });
+  const existing = subscribedFarmers.find(f => f.phone === phone);
+  if (existing) { existing.state = state; existing.lang = lang; }
+  else subscribedFarmers.push({ phone, state, lang, subscribedAt: new Date().toISOString() });
+  res.json({ success:true, message:"Subscribed for disease outbreak alerts" });
+});
+
+// Get current active alerts
+app.get("/api/alerts", generalLimiter, (req,res) => {
+  const { state } = req.query;
+  const sevenDaysAgo = Date.now() - 7*24*60*60*1000;
+  const active = outbreakAlerts.filter(a =>
+    new Date(a.date).getTime() > sevenDaysAgo &&
+    (!state || a.state.toLowerCase() === state.toLowerCase())
+  );
+  res.json({ alerts: active, total: active.length });
+});
+
+// Report a disease outbreak (triggered automatically from diagnose endpoint)
+function checkAndTriggerAlert(disease, state, category) {
+  if (!disease || disease === "unknown" || !state) return;
+  const sevenDaysAgo = Date.now() - 7*24*60*60*1000;
+
+  // Count recent reports of same disease in same state
+  const recentReports = auditLog.filter(e =>
+    e.disease === disease &&
+    e.state === state &&
+    new Date(e.timestamp).getTime() > sevenDaysAgo
+  );
+
+  // Trigger alert at 5 reports
+  if (recentReports.length >= 5) {
+    const existing = outbreakAlerts.find(a => a.disease === disease && a.state === state);
+    if (!existing) {
+      const alert = {
+        id: Date.now(),
+        disease, state, category,
+        reports: recentReports.length,
+        date: new Date().toISOString(),
+        message: `⚠️ OUTBREAK ALERT: ${recentReports.length} farmers in ${state} have reported ${disease} in the last 7 days. Check your farm immediately.`
+      };
+      outbreakAlerts.push(alert);
+      console.log(`🚨 Outbreak alert triggered: ${disease} in ${state} (${recentReports.length} reports)`);
+    } else {
+      existing.reports = recentReports.length;
+    }
+  }
+}
+
+// ── DEALER PORTAL ENDPOINTS ───────────────────────────────────────────────────
+const dealerSessions = new Map(); // dealerKey -> dealer data
+
+// Dealer login
+app.post("/api/dealer/login", generalLimiter, express.json(), (req,res) => {
+  const { phone, businessName } = req.body;
+  if (!phone || !businessName) return res.status(400).json({ error:"phone and businessName required" });
+
+  const regs = getRegistrations();
+  const dealer = regs.find(r =>
+    r.phone === phone &&
+    r.businessName.toLowerCase() === businessName.toLowerCase() &&
+    r.approved
+  );
+
+  if (!dealer) return res.status(401).json({ error:"Business not found or not yet approved. Contact AgroDoc AI support." });
+
+  const sessionKey = "dealer_" + Math.random().toString(36).slice(2,12);
+  dealerSessions.set(sessionKey, { ...dealer, loginAt: new Date().toISOString() });
+  setTimeout(() => dealerSessions.delete(sessionKey), 24*60*60*1000); // 24hr session
+
+  res.json({ success:true, sessionKey, dealer: { businessName:dealer.businessName, type:dealer.type, stateLGA:dealer.stateLGA, services:dealer.services, phone:dealer.phone } });
+});
+
+// Get dealer dashboard data
+app.get("/api/dealer/dashboard", (req,res) => {
+  const key = req.headers["x-dealer-key"];
+  const dealer = dealerSessions.get(key);
+  if (!dealer) return res.status(401).json({ error:"Invalid or expired session. Please log in again." });
+
+  // Count farmer views — how many diagnoses recommended products in dealer's state
+  const sevenDaysAgo = Date.now() - 7*24*60*60*1000;
+  const stateActivity = auditLog.filter(e =>
+    e.state === dealer.stateLGA?.split("—")[0]?.trim() &&
+    new Date(e.timestamp).getTime() > sevenDaysAgo
+  );
+
+  const topDiseases = {};
+  stateActivity.forEach(e => {
+    if (e.disease && e.disease !== "unknown") topDiseases[e.disease] = (topDiseases[e.disease]||0)+1;
+  });
+
+  const alerts = outbreakAlerts.filter(a =>
+    a.state.toLowerCase().includes(dealer.stateLGA?.split("—")[0]?.toLowerCase()?.trim() || "")
+  );
+
+  res.json({
+    dealer: { businessName:dealer.businessName, type:dealer.type, stateLGA:dealer.stateLGA },
+    stats: {
+      farmerActivityInArea: stateActivity.length,
+      activeOutbreakAlerts: alerts.length,
+      topDiseasesNearYou: Object.entries(topDiseases).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([d,c])=>({disease:d,count:c})),
+    },
+    alerts,
+    lastUpdated: new Date().toISOString(),
+  });
+});
+
+// Update dealer stock/services
+app.post("/api/dealer/update", express.json(), (req,res) => {
+  const key = req.headers["x-dealer-key"];
+  const dealer = dealerSessions.get(key);
+  if (!dealer) return res.status(401).json({ error:"Invalid session" });
+
+  const { services, phone, email } = req.body;
+  if (services) dealer.services = services;
+  if (phone) dealer.phone = phone;
+  if (email) dealer.email = email;
+  dealerSessions.set(key, dealer);
+  res.json({ success:true, message:"Profile updated successfully" });
 });
 
 // Market prices
