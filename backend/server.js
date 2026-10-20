@@ -39,6 +39,8 @@ app.get("/admin", (req,res) => res.sendFile(path.join(__dirname, "admin.html")))
 app.get("/admin.html", (req,res) => res.sendFile(path.join(__dirname, "admin.html")));
 app.get("/dealer", (req,res) => res.sendFile(path.join(__dirname, "dealer.html")));
 app.get("/dealer.html", (req,res) => res.sendFile(path.join(__dirname, "dealer.html")));
+app.get("/register", (req,res) => res.sendFile(path.join(__dirname, "register.html")));
+app.get("/register.html", (req,res) => res.sendFile(path.join(__dirname, "register.html")));
 app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
