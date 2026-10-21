@@ -731,7 +731,15 @@ Return ONLY raw JSON (no markdown, no backticks, no extra text):
   "disclaimer": "AgroDoc AI is advisory only. [Add vet/ADP referral if severe or notifiable disease]",
   "whatsappSummary": "2-sentence summary a farmer can share with neighbours on WhatsApp"
 }
-If the crop or animal looks healthy: set disease to 'Healthy — No Disease Found' and give care tips. All text fields in the selected language EXCEPT subject (always English).`;
+HEALTHY PLANT OR ANIMAL RESPONSE — Very important:
+If the crop or animal looks healthy with no disease visible, do NOT just say "nothing wrong." Instead:
+1. Celebrate it warmly — tell the farmer their farm looks good
+2. Give 3 specific things to watch for in the next 4 to 6 weeks for that specific crop or animal
+3. Give 2 prevention tips for the most common disease that affects that crop or animal
+4. Encourage them to keep monitoring weekly
+Set disease to "Healthy — No Disease Found", severity to "mild", confidence to "high".
+Make the description warm, encouraging and specific to the crop or animal — not generic.
+All text fields in the selected language EXCEPT subject (always English).`;
 }
 
 // ── MAIN DIAGNOSE FUNCTION ────────────────────────────────────────────────────
