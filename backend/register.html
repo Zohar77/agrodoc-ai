@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AgroDoc AI — Register Your Business</title>
+<style>
+:root{--g1:#050e07;--g2:#0a1f10;--lime:#6ee569;--gold:#f5c518;--border:rgba(110,229,105,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-height:100vh}
+.hdr{background:var(--g2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:17px;font-weight:800;color:var(--lime)}
+.box{background:var(--g2);border:1px solid var(--border);border-radius:18px;padding:36px;max-width:480px;margin:40px auto}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#e8f5e9;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
+.inp:focus{border-color:rgba(110,229,105,.5)}
+.btn{background:linear-gradient(135deg,#15803d,#22c55e);color:#071209;border:none;padding:13px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;width:100%;font-family:inherit;transition:all .2s;margin-top:4px}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.label{font-size:11px;color:#3d6b4a;margin-bottom:4px;font-weight:700;display:block}
+.type-row{display:flex;gap:10px;margin-bottom:12px}
+.type-btn{flex:1;padding:12px 8px;border:1.5px solid rgba(110,229,105,.2);background:rgba(255,255,255,.03);color:#5a8a65;border-radius:12px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;text-align:center;transition:all .2s}
+.type-btn.on{border-color:#6ee569;background:rgba(110,229,105,.1);color:#6ee569}
+.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:10px;display:none}
+.success{background:rgba(110,229,105,.08);border:1px solid rgba(110,229,105,.25);border-radius:10px;padding:20px;text-align:center;display:none}
+.ta{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#e8f5e9;font-size:13px;outline:none;font-family:inherit;resize:none}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">🌿 AgroDoc AI</div>
+  <a href="https://agrodoc-ai.vercel.app" style="font-size:12px;color:#3d6b4a;text-decoration:none">← Back to App</a>
+</div>
+
+<div class="box">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:44px;margin-bottom:10px">🏪</div>
+    <div style="font-size:20px;font-weight:800;color:#6ee569">Register Your Business</div>
+    <div style="font-size:13px;color:#3d6b4a;margin-top:6px;line-height:1.55">Join the AgroDoc AI directory — farmers in your area will find you when they need products or a vet visit. Completely free.</div>
+  </div>
+
+  <!-- Error -->
+  <div class="err" id="err-msg"></div>
+
+  <!-- Success -->
+  <div class="success" id="success-box">
+    <div style="font-size:40px;margin-bottom:12px">🎉</div>
+    <div style="font-size:18px;font-weight:800;color:#6ee569;margin-bottom:8px">Registration Submitted!</div>
+    <div style="font-size:13px;color:#86efac;line-height:1.6;margin-bottom:16px">We will review your listing within 48 hours and add you to the directory. Farmers in your area will then be able to find you.</div>
+    <div style="font-size:12px;color:#3d6b4a">You can log into the dealer portal at:<br/><a href="https://agrodoc-ai.onrender.com/dealer" style="color:#6ee569">agrodoc-ai.onrender.com/dealer</a></div>
+  </div>
+
+  <!-- Form -->
+  <div id="reg-form">
+    <!-- Type -->
+    <span class="label">I AM A:</span>
+    <div class="type-row">
+      <button class="type-btn on" id="type-dealer" onclick="setType('agro_dealer')">🏪 Agro Dealer</button>
+      <button class="type-btn" id="type-vet" onclick="setType('vet')">🐄 Vet / Extension Worker</button>
+    </div>
+
+    <span class="label">BUSINESS / SHOP NAME *</span>
+    <input class="inp" id="f-bname" placeholder="e.g. Emeka Agro Supplies"/>
+
+    <span class="label">YOUR FULL NAME *</span>
+    <input class="inp" id="f-cname" placeholder="e.g. Emeka Johnson"/>
+
+    <span class="label">PHONE NUMBER FARMERS CAN CALL *</span>
+    <input class="inp" id="f-phone" placeholder="e.g. 08012345678" type="tel"/>
+
+    <span class="label">EMAIL ADDRESS (OPTIONAL)</span>
+    <input class="inp" id="f-email" placeholder="e.g. emeka@shop.com" type="email"/>
+
+    <span class="label">STATE AND LGA *</span>
+    <input class="inp" id="f-lga" placeholder="e.g. FCT — Gwagwalada"/>
+
+    <span class="label" id="services-label">PRODUCTS YOU SELL *</span>
+    <textarea class="ta" id="f-services" rows="3" placeholder="e.g. NPK Fertilizer, Pesticides, Seeds, Vaccines, Animal feed..." style="margin-bottom:16px"></textarea>
+
+    <div style="font-size:11px;color:#3d6b4a;margin-bottom:14px;line-height:1.55">
+      🔒 Your information is reviewed within 48 hours before being listed. We never share your data without your consent.
+    </div>
+
+    <button class="btn" id="submit-btn" onclick="submitReg()">✅ Submit Registration — Free</button>
+  </div>
+</div>
+
+<script>
+const B = "https://agrodoc-ai.onrender.com";
+const APP_KEY = "agrodocai2026master";
+let bizType = "agro_dealer";
+
+function setType(t) {
+  bizType = t;
+  document.getElementById("type-dealer").classList.toggle("on", t === "agro_dealer");
+  document.getElementById("type-vet").classList.toggle("on", t === "vet");
+  document.getElementById("services-label").textContent = t === "vet" ? "ANIMALS YOU TREAT *" : "PRODUCTS YOU SELL *";
+  document.getElementById("f-services").placeholder = t === "vet"
+    ? "e.g. Poultry, goats, cattle, fish, pigs..."
+    : "e.g. NPK Fertilizer, Pesticides, Seeds, Vaccines, Animal feed...";
+}
+
+function showErr(msg) {
+  const e = document.getElementById("err-msg");
+  e.textContent = msg; e.style.display = "block";
+  setTimeout(() => e.style.display = "none", 5000);
+}
+
+async function submitReg() {
+  const businessName = document.getElementById("f-bname").value.trim();
+  const contactName  = document.getElementById("f-cname").value.trim();
+  const phone        = document.getElementById("f-phone").value.trim();
+  const email        = document.getElementById("f-email").value.trim();
+  const stateLGA     = document.getElementById("f-lga").value.trim();
+  const services     = document.getElementById("f-services").value.trim();
+
+  if (!businessName) { showErr("Please enter your business name"); return; }
+  if (!contactName)  { showErr("Please enter your full name"); return; }
+  if (!phone)        { showErr("Please enter your phone number"); return; }
+  if (!stateLGA)     { showErr("Please enter your state and LGA"); return; }
+  if (!services)     { showErr(bizType === "vet" ? "Please list animals you treat" : "Please list products you sell"); return; }
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  try {
+    const res = await fetch(`${B}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "X-App-Key":APP_KEY },
+      body: JSON.stringify({ type:bizType, businessName, contactName, phone, email, stateLGA, services, source:"web-portal" }),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      document.getElementById("reg-form").style.display = "none";
+      document.getElementById("success-box").style.display = "block";
+    } else {
+      showErr(data.error || "Registration failed. Please try again.");
+      btn.disabled = false;
+      btn.textContent = "✅ Submit Registration — Free";
+    }
+  } catch(e) {
+    showErr("Could not connect. Please check your internet and try again.");
+    btn.disabled = false;
+    btn.textContent = "✅ Submit Registration — Free";
+  }
+}
+</script>
+</body>
+</html>
