@@ -9,6 +9,29 @@ const path   = require("path");
 const { execSync } = require("child_process");
 const { diagnose, tryOfflineCache } = require("./ai");
 
+// Voice notes — load if Google TTS key is available
+let voiceModule = null;
+try { voiceModule = require("./voice"); } catch(e) { console.log("Voice module not loaded:", e.message); }
+
+// Try to send voice note — silently fails if TTS not configured
+async function trySendVoiceNote(phone, result, lang) {
+  if (!voiceModule || !process.env.GOOGLE_TTS_API_KEY) return;
+  if (!process.env.WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) return;
+  try {
+    const text = voiceModule.buildVoiceSummary(result, lang);
+    const audioFile = await voiceModule.generateVoiceNote(text, lang);
+    if (audioFile) {
+      await voiceModule.sendWhatsAppVoiceNote(
+        phone, audioFile,
+        process.env.WHATSAPP_TOKEN,
+        process.env.WHATSAPP_PHONE_NUMBER_ID
+      );
+    }
+  } catch(e) {
+    console.error("Voice note error (non-fatal):", e.message);
+  }
+}
+
 const WHATSAPP_API = "https://graph.facebook.com/v19.0";
 
 // ── PER-PHONE RATE LIMITING ───────────────────────────────────────────────────
@@ -530,6 +553,8 @@ async function handleWhatsAppMessage(message, contact) {
       session.lastDiagnosis = result;
       await sendMessage(phone, formatReply(result, session));
       session.diagnosisCount++;
+      // Send voice note after text diagnosis
+      await trySendVoiceNote(phone, result, lang);
     } catch { await sendMessage(phone, ERROR_MSG[lang]||ERROR_MSG.en); }
     return;
   }
@@ -546,6 +571,8 @@ async function handleWhatsAppMessage(message, contact) {
       session.lastDiagnosis = result;
       await sendMessage(phone, formatReply(result, session));
       session.diagnosisCount++;
+      // Send voice note after image diagnosis
+      await trySendVoiceNote(phone, result, lang);
     } catch {
       const cached = caption ? tryOfflineCache(caption) : null;
       if (cached) { session.lastDiagnosis = cached; await sendMessage(phone, formatReply(cached, session)+"_⚡ Offline_"); }
