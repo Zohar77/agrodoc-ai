@@ -402,11 +402,10 @@ app.post("/api/dealer/login", generalLimiter, express.json(), (req,res) => {
   const regs = getRegistrations();
   const dealer = regs.find(r =>
     r.phone === phone &&
-    r.businessName.toLowerCase() === businessName.toLowerCase() &&
-    r.approved
+    r.businessName.toLowerCase() === businessName.toLowerCase()
   );
 
-  if (!dealer) return res.status(401).json({ error:"Business not found or not yet approved. Contact AgroDoc AI support." });
+  if (!dealer) return res.status(401).json({ error:"Business not found. Please register first at agrodoc-ai.onrender.com/register or check your business name and phone number." });
 
   const sessionKey = "dealer_" + Math.random().toString(36).slice(2,12);
   dealerSessions.set(sessionKey, { ...dealer, loginAt: new Date().toISOString() });
