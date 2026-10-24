@@ -16,8 +16,50 @@ const rateLimit  = require("express-rate-limit");
 const multer     = require("multer");
 const crypto     = require("crypto");
 const path       = require("path");
+const fs         = require("fs");
 const { diagnose, tryOfflineCache, CACHE_VERSION } = require("./ai");
-const { handleWhatsAppMessage, isWhatsAppRateLimited, getRegistrations } = require("./whatsapp");
+const { handleWhatsAppMessage, isWhatsAppRateLimited } = require("./whatsapp");
+
+// ── FILE-BASED REGISTRATION PERSISTENCE ──────────────────────────────────────
+// Saves registrations to a JSON file so they survive Render restarts
+const REG_FILE = path.join(__dirname, "registrations.json");
+
+function loadRegistrations() {
+  try {
+    if (fs.existsSync(REG_FILE)) {
+      return JSON.parse(fs.readFileSync(REG_FILE, "utf8"));
+    }
+  } catch(e) { console.error("Error loading registrations:", e.message); }
+  return [];
+}
+
+function saveRegistrations(regs) {
+  try { fs.writeFileSync(REG_FILE, JSON.stringify(regs, null, 2)); }
+  catch(e) { console.error("Error saving registrations:", e.message); }
+}
+
+function getRegistrations() {
+  return loadRegistrations();
+}
+
+function addRegistration(reg) {
+  const regs = loadRegistrations();
+  regs.push(reg);
+  saveRegistrations(regs);
+  return regs;
+}
+
+function approveRegistration(id) {
+  const regs = loadRegistrations();
+  const reg = regs.find(r => r.id === id);
+  if (reg) {
+    reg.approved = true;
+    reg.approvedAt = new Date().toISOString();
+    saveRegistrations(regs);
+    return true;
+  }
+  return false;
+}
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -605,9 +647,9 @@ app.post("/api/register",generalLimiter,express.json(),(req,res)=>{
       submittedAt:new Date().toISOString(),
       approved:false,
     };
-    getRegistrations().push(reg);
+    addRegistration(reg);
     res.json({success:true,id:reg.id,message:"Registration submitted! We will review and add you to the directory within 48 hours."});
-  }catch(err){res.status(500).json({error:"Could not save registration."});}
+  }catch(err){console.error("Register error:",err.message);res.status(500).json({error:"Could not save registration: "+err.message});}
 });
 
 // Admin: View all registrations
@@ -622,12 +664,9 @@ app.get("/api/registrations",(req,res)=>{
 // Admin: Approve a registration
 app.post("/api/registrations/:id/approve",express.json(),(req,res)=>{
   if(req.headers["x-admin-key"]!==process.env.ADMIN_KEY)return res.status(403).json({error:"Forbidden"});
-  const regs=getRegistrations();
-  const reg=regs.find(r=>r.id===req.params.id);
-  if(!reg)return res.status(404).json({error:"Registration not found"});
-  reg.approved=true;
-  reg.approvedAt=new Date().toISOString();
-  res.json({success:true,reg});
+  const approved = approveRegistration(req.params.id);
+  if(!approved)return res.status(404).json({error:"Registration not found"});
+  res.json({success:true,message:"Registration approved"});
 });
 
 // Public: Get approved directory listings
