@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AgroDoc AI — Register as a Buyer</title>
+<style>
+:root{--g1:#050e07;--g2:#0a1f10;--lime:#6ee569;--gold:#f5c518;--border:rgba(110,229,105,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-height:100vh}
+.hdr{background:var(--g2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:17px;font-weight:800;color:var(--lime)}
+.box{background:var(--g2);border:1px solid var(--border);border-radius:18px;padding:36px;max-width:500px;margin:40px auto}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#e8f5e9;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
+.inp:focus{border-color:rgba(110,229,105,.5)}
+.btn{background:linear-gradient(135deg,#b45309,#f0b429);color:#1a0a00;border:none;padding:13px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;width:100%;font-family:inherit;transition:all .2s;margin-top:4px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.label{font-size:11px;color:#3d6b4a;margin-bottom:4px;font-weight:700;display:block}
+.produce-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.produce-btn{padding:7px 14px;border:1px solid rgba(110,229,105,.2);background:rgba(255,255,255,.03);color:#5a8a65;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .2s}
+.produce-btn.on{border-color:#f0b429;background:rgba(240,180,41,.1);color:#f0b429}
+.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:10px;display:none}
+.success{background:rgba(110,229,105,.08);border:1px solid rgba(110,229,105,.25);border-radius:14px;padding:24px;text-align:center;display:none}
+.benefits{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}
+.benefit{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;font-size:12px;color:#86efac}
+.benefit-icon{font-size:24px;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo">🌿 AgroDoc AI Marketplace</div>
+  <a href="https://agrodoc-ai.vercel.app" style="font-size:12px;color:#3d6b4a;text-decoration:none">← Back to App</a>
+</div>
+
+<div class="box">
+  <div style="text-align:center;margin-bottom:24px">
+    <div style="font-size:44px;margin-bottom:10px">🛒</div>
+    <div style="font-size:20px;font-weight:800;color:#f0b429">Register as a Buyer</div>
+    <div style="font-size:13px;color:#3d6b4a;margin-top:6px;line-height:1.55">Connect directly with verified Nigerian farmers. Buy fresh produce at farm gate prices.</div>
+  </div>
+
+  <div class="benefits">
+    <div class="benefit"><div class="benefit-icon">🌾</div>Direct from farmers</div>
+    <div class="benefit"><div class="benefit-icon">📍</div>GPS-verified locations</div>
+    <div class="benefit"><div class="benefit-icon">💰</div>Farm gate prices</div>
+    <div class="benefit"><div class="benefit-icon">🔔</div>Instant notifications</div>
+  </div>
+
+  <div class="err" id="err-msg"></div>
+  <div class="success" id="success-box">
+    <div style="font-size:40px;margin-bottom:12px">🎉</div>
+    <div style="font-size:18px;font-weight:800;color:#f0b429;margin-bottom:8px">Registration Successful!</div>
+    <div style="font-size:13px;color:#86efac;line-height:1.6;margin-bottom:16px">You are now registered as a buyer. Farmers listing your preferred produce will be notified. You can browse available listings below.</div>
+    <a href="https://agrodoc-ai.onrender.com/marketplace" style="background:linear-gradient(135deg,#b45309,#f0b429);color:#1a0a00;padding:12px 24px;border-radius:10px;font-weight:800;font-size:14px;text-decoration:none;display:inline-block">Browse Listings →</a>
+  </div>
+
+  <div id="reg-form">
+    <span class="label">BUSINESS / COMPANY NAME *</span>
+    <input class="inp" id="f-bname" placeholder="e.g. Lagos Fresh Produce Ltd"/>
+
+    <span class="label">CONTACT PERSON NAME *</span>
+    <input class="inp" id="f-cname" placeholder="e.g. Chukwuemeka Obi"/>
+
+    <span class="label">PHONE NUMBER *</span>
+    <input class="inp" id="f-phone" placeholder="e.g. 08012345678" type="tel"/>
+
+    <span class="label">EMAIL ADDRESS *</span>
+    <input class="inp" id="f-email" placeholder="e.g. purchases@company.com" type="email"/>
+
+    <span class="label">STATE YOU OPERATE IN *</span>
+    <input class="inp" id="f-state" placeholder="e.g. Lagos, FCT, Kano"/>
+
+    <span class="label">WHAT PRODUCE DO YOU BUY? (Select all that apply) *</span>
+    <div class="produce-grid" id="produce-grid"></div>
+
+    <span class="label">PREFERRED PAYMENT METHOD</span>
+    <select class="inp" id="f-payment">
+      <option value="bank_transfer">Bank Transfer</option>
+      <option value="cash">Cash on Delivery</option>
+      <option value="paystack">Paystack Online Payment</option>
+      <option value="escrow">Escrow via AgroDoc AI</option>
+    </select>
+
+    <div style="background:rgba(245,197,24,.06);border:1px solid rgba(245,197,24,.2);border-radius:10px;padding:12px;margin:14px 0;font-size:12px;color:#fef9c3;line-height:1.6">
+      💰 <b>Buyer Listing Fee:</b> ₦3,000/month to be listed as a verified buyer. Farmers see your contact details and can reach you directly. First month free.
+    </div>
+
+    <button class="btn" id="submit-btn" onclick="submitReg()">🛒 Register as Buyer — First Month Free</button>
+  </div>
+</div>
+
+<script>
+const B = "https://agrodoc-ai.onrender.com";
+const APP_KEY = "agrodocai2026master";
+const PRODUCES = ["Cassava","Maize","Rice","Yam","Tomato","Pepper","Groundnut","Soybean","Plantain","Cocoa","Palm Oil","Catfish","Tilapia","Broiler Chicken","Ginger","Onion","Sorghum","Cowpea","Other"];
+let selectedProduce = [];
+
+// Build produce grid
+const grid = document.getElementById("produce-grid");
+PRODUCES.forEach(p => {
+  const btn = document.createElement("button");
+  btn.className = "produce-btn";
+  btn.textContent = p;
+  btn.onclick = () => {
+    if (selectedProduce.includes(p)) {
+      selectedProduce = selectedProduce.filter(x => x !== p);
+      btn.classList.remove("on");
+    } else {
+      selectedProduce.push(p);
+      btn.classList.add("on");
+    }
+  };
+  grid.appendChild(btn);
+});
+
+function showErr(msg) {
+  const e = document.getElementById("err-msg");
+  e.textContent = msg; e.style.display = "block";
+  setTimeout(() => e.style.display = "none", 5000);
+}
+
+async function submitReg() {
+  const businessName = document.getElementById("f-bname").value.trim();
+  const contactName  = document.getElementById("f-cname").value.trim();
+  const phone        = document.getElementById("f-phone").value.trim();
+  const email        = document.getElementById("f-email").value.trim();
+  const state        = document.getElementById("f-state").value.trim();
+  const paymentMethod = document.getElementById("f-payment").value;
+
+  if (!businessName) { showErr("Please enter your business name"); return; }
+  if (!contactName)  { showErr("Please enter your contact name"); return; }
+  if (!phone)        { showErr("Please enter your phone number"); return; }
+  if (!email)        { showErr("Please enter your email address"); return; }
+  if (!state)        { showErr("Please enter your state"); return; }
+  if (selectedProduce.length === 0) { showErr("Please select at least one produce you buy"); return; }
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Registering...";
+
+  try {
+    const res = await fetch(`${B}/api/marketplace/buyers/register`, {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "X-App-Key":APP_KEY },
+      body: JSON.stringify({ businessName, contactName, phone, email, state, produces:selectedProduce, paymentMethod }),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      document.getElementById("reg-form").style.display = "none";
+      document.getElementById("success-box").style.display = "block";
+    } else {
+      showErr(data.error || "Registration failed. Please try again.");
+      btn.disabled = false;
+      btn.textContent = "🛒 Register as Buyer — First Month Free";
+    }
+  } catch(e) {
+    showErr("Could not connect. Please check your internet and try again.");
+    btn.disabled = false;
+    btn.textContent = "🛒 Register as Buyer — First Month Free";
+  }
+}
+</script>
+</body>
+</html>
