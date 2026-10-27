@@ -69,8 +69,7 @@ app.get("/buyer", (req,res) => res.sendFile(path.join(__dirname, "buyer.html")))
 
 // ── MARKETPLACE API ENDPOINTS ─────────────────────────────────────────────────
 // Get all listings
-app.get("/api/marketplace/listings", typeof generalLimiter !== 'undefined' ? generalLimiter : (req, res, next) => next(), (req,res) => {
-
+app.get("/api/marketplace/listings", generalLimiter, (req,res) => {
   const { produce, state, status } = req.query;
   const listings = marketplace.getListings({ produce, state, status });
   res.json({ listings, total: listings.length });
