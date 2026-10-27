@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AgroDoc AI — Marketplace</title>
+<style>
+:root{--g1:#050e07;--g2:#0a1f10;--lime:#6ee569;--gold:#f5c518;--border:rgba(110,229,105,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-height:100vh}
+.hdr{background:var(--g2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.logo{font-size:17px;font-weight:800;color:var(--lime)}
+.content{max-width:900px;margin:0 auto;padding:24px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.sc{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+.sn{font-size:26px;font-weight:900;margin-bottom:4px}
+.sl{font-size:10px;color:#3d6b4a;font-weight:700;text-transform:uppercase}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.inp{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:9px 14px;color:#e8f5e9;font-size:13px;outline:none;font-family:inherit}
+.inp:focus{border-color:rgba(110,229,105,.5)}
+.btn{background:linear-gradient(135deg,#15803d,#22c55e);color:#071209;border:none;padding:9px 18px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+.btn-gold{background:linear-gradient(135deg,#b45309,#f0b429);color:#1a0a00}
+.listings{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.listing-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:18px;transition:all .2s}
+.listing-card:hover{border-color:rgba(110,229,105,.3);transform:translateY(-2px)}
+.produce-tag{display:inline-block;background:rgba(110,229,105,.1);color:var(--lime);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:10px;text-transform:capitalize}
+.price{font-size:20px;font-weight:900;color:var(--lime);margin:8px 0}
+.meta{font-size:11px;color:#3d6b4a;margin-bottom:4px}
+.contact-btn{background:rgba(110,229,105,.08);border:1px solid rgba(110,229,105,.25);color:var(--lime);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;width:100%;margin-top:12px;font-family:inherit;transition:all .2s}
+.contact-btn:hover{background:rgba(110,229,105,.16)}
+.empty{text-align:center;padding:60px 20px;color:#3d6b4a}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.badge-available{background:rgba(110,229,105,.1);color:var(--lime)}
+.badge-reserved{background:rgba(245,197,24,.1);color:var(--gold)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.modal.on{display:flex}
+.modal-box{background:var(--g2);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:400px;width:90%}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo">🌿 AgroDoc AI Marketplace</div>
+  <div style="display:flex;gap:10px">
+    <a href="https://agrodoc-ai.onrender.com/buyer" class="btn btn-gold" style="font-size:12px;padding:7px 14px">🛒 Register as Buyer</a>
+    <a href="https://agrodoc-ai.vercel.app" style="font-size:12px;color:#3d6b4a;text-decoration:none;padding:7px 0">← App</a>
+  </div>
+</div>
+
+<div class="content">
+  <!-- Stats -->
+  <div class="stats" id="stats">
+    <div class="sc"><div class="sn" style="color:var(--lime)" id="s-listings">—</div><div class="sl">Active Listings</div></div>
+    <div class="sc"><div class="sn" style="color:var(--gold)" id="s-buyers">—</div><div class="sl">Registered Buyers</div></div>
+    <div class="sc"><div class="sn" style="color:#60a5fa" id="s-orders">—</div><div class="sl">Orders Completed</div></div>
+    <div class="sc"><div class="sn" style="color:#a78bfa" id="s-value">—</div><div class="sl">Total Value (₦)</div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input class="inp" id="f-produce" placeholder="Search produce..." oninput="loadListings()" style="flex:1;min-width:150px"/>
+    <input class="inp" id="f-state" placeholder="Filter by state..." oninput="loadListings()" style="width:160px"/>
+    <button class="btn" onclick="loadListings()">🔍 Search</button>
+    <a href="https://agrodoc-ai.vercel.app" class="btn" style="background:rgba(110,229,105,.08);color:var(--lime);border:1px solid rgba(110,229,105,.25)">📱 List via WhatsApp</a>
+  </div>
+
+  <!-- How to list -->
+  <div style="background:rgba(110,229,105,.05);border:1px solid rgba(110,229,105,.15);border-radius:12px;padding:14px;margin-bottom:20px;font-size:13px;color:#86efac;line-height:1.7">
+    📱 <b>Farmers:</b> List your produce by sending <b>SELL</b> to our WhatsApp bot at <b>+234 903 083 2832</b><br/>
+    🛒 <b>Buyers:</b> <a href="https://agrodoc-ai.onrender.com/buyer" style="color:var(--gold)">Register as a buyer</a> to get notified when farmers list your preferred produce
+  </div>
+
+  <!-- Listings grid -->
+  <div class="listings" id="listings-grid">
+    <div class="empty">
+      <div style="font-size:40px;margin-bottom:12px">🌾</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">No listings yet</div>
+      <div style="font-size:13px">Farmers will list their produce here via WhatsApp</div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="modal" id="contact-modal">
+  <div class="modal-box">
+    <div style="font-size:22px;font-weight:800;color:var(--lime);margin-bottom:4px" id="modal-produce"></div>
+    <div style="font-size:13px;color:#3d6b4a;margin-bottom:16px" id="modal-details"></div>
+    <div style="background:rgba(110,229,105,.06);border:1px solid rgba(110,229,105,.2);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;color:#3d6b4a;margin-bottom:4px;font-weight:700">FARMER CONTACT</div>
+      <div style="font-size:16px;font-weight:800;color:var(--lime)" id="modal-phone"></div>
+    </div>
+    <a id="modal-call" href="#" class="btn" style="display:block;text-align:center;margin-bottom:10px">📞 Call Farmer</a>
+    <a id="modal-wa" href="#" class="btn" style="display:block;text-align:center;background:rgba(37,211,102,.15);color:#25d366;border:1px solid rgba(37,211,102,.3)">💬 WhatsApp Farmer</a>
+    <button onclick="closeModal()" style="width:100%;margin-top:10px;background:transparent;border:1px solid var(--border);color:#3d6b4a;padding:9px;border-radius:8px;cursor:pointer;font-family:inherit">Close</button>
+  </div>
+</div>
+
+<script>
+const B = "https://agrodoc-ai.onrender.com";
+const APP_KEY = "agrodocai2026master";
+
+async function loadStats() {
+  try {
+    const data = await fetch(`${B}/api/marketplace/stats`, { headers:{"X-App-Key":APP_KEY} }).then(r=>r.json());
+    document.getElementById("s-listings").textContent = data.active_listings || 0;
+    document.getElementById("s-buyers").textContent = data.total_buyers || 0;
+    document.getElementById("s-orders").textContent = data.completed_orders || 0;
+    document.getElementById("s-value").textContent = data.total_transaction_value ? "₦" + (data.total_transaction_value/1000).toFixed(0) + "K" : "₦0";
+  } catch(e) {}
+}
+
+async function loadListings() {
+  const produce = document.getElementById("f-produce").value.trim();
+  const state   = document.getElementById("f-state").value.trim();
+  let url = `${B}/api/marketplace/listings?`;
+  if (produce) url += `produce=${encodeURIComponent(produce)}&`;
+  if (state)   url += `state=${encodeURIComponent(state)}&`;
+
+  try {
+    const data = await fetch(url, { headers:{"X-App-Key":APP_KEY} }).then(r=>r.json());
+    const grid = document.getElementById("listings-grid");
+    if (!data.listings || data.listings.length === 0) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <div style="font-size:40px;margin-bottom:12px">🌾</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">No listings found</div>
+        <div style="font-size:13px">Try a different search or check back soon</div>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = data.listings.map(l => `
+      <div class="listing-card">
+        <span class="produce-tag">${l.produce}</span>
+        <span class="badge ${l.status === 'available' ? 'badge-available' : 'badge-reserved'}" style="float:right">${l.status}</span>
+        <div style="font-size:15px;font-weight:800;margin-bottom:4px;text-transform:capitalize">${l.quantity} ${l.unit} of ${l.produce}</div>
+        <div class="price">₦${l.pricePerUnit.toLocaleString()}<span style="font-size:13px;font-weight:400;color:#3d6b4a"> per ${l.unit}</span></div>
+        <div class="meta">💵 Total Value: ₦${l.totalValue.toLocaleString()}</div>
+        <div class="meta">📍 ${l.lga ? l.lga + ", " : ""}${l.state}</div>
+        <div class="meta">👨‍🌾 ${l.farmerName}</div>
+        <div class="meta">📅 Listed ${new Date(l.createdAt).toLocaleDateString("en-NG")}</div>
+        ${l.harvestDate ? `<div class="meta">🌾 Harvest: ${new Date(l.harvestDate).toLocaleDateString("en-NG")}</div>` : ""}
+        ${l.notes ? `<div style="font-size:11px;color:#5a8a65;margin-top:6px;font-style:italic">${l.notes}</div>` : ""}
+        <button class="contact-btn" onclick='showContact(${JSON.stringify(l)})'>📞 Contact Farmer</button>
+      </div>`).join("");
+  } catch(e) {
+    document.getElementById("listings-grid").innerHTML = '<div class="empty" style="grid-column:1/-1"><div style="color:#f87171">Could not load listings. Check connection.</div></div>';
+  }
+}
+
+function showContact(listing) {
+  document.getElementById("modal-produce").textContent = listing.produce.charAt(0).toUpperCase() + listing.produce.slice(1);
+  document.getElementById("modal-details").textContent = `${listing.quantity} ${listing.unit} · ₦${listing.pricePerUnit.toLocaleString()} per ${listing.unit} · ${listing.state}`;
+  document.getElementById("modal-phone").textContent = listing.farmerPhone;
+  document.getElementById("modal-call").href = `tel:${listing.farmerPhone}`;
+  document.getElementById("modal-wa").href = `https://wa.me/${listing.farmerPhone.replace(/^0/, "234")}?text=Hello%20${listing.farmerName}%2C%20I%20saw%20your%20${listing.produce}%20listing%20on%20AgroDoc%20AI%20and%20I%20am%20interested%20in%20buying.`;
+  document.getElementById("contact-modal").classList.add("on");
+}
+
+function closeModal() {
+  document.getElementById("contact-modal").classList.remove("on");
+}
+
+window.onclick = e => { if(e.target.id === "contact-modal") closeModal(); };
+
+loadStats();
+loadListings();
+setInterval(loadListings, 60000); // Refresh every minute
+</script>
+</body>
+</html>
