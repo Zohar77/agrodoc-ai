@@ -16,46 +16,27 @@ const rateLimit  = require("express-rate-limit");
 const multer     = require("multer");
 const crypto     = require("crypto");
 const path       = require("path");
-const fs         = require("fs");
 const { diagnose, tryOfflineCache, CACHE_VERSION } = require("./ai");
 const { handleWhatsAppMessage, isWhatsAppRateLimited } = require("./whatsapp");
+const marketplace = require("./marketplace");
 
-// ── FILE-BASED REGISTRATION PERSISTENCE ──────────────────────────────────────
-// Saves registrations to a JSON file so they survive Render restarts
-const REG_FILE = path.join(__dirname, "registrations.json");
+// ── IN-MEMORY REGISTRATION STORE ─────────────────────────────────────────────
+// Note: Render free tier resets memory on restart — upgrade to paid tier
+// or add a database (MongoDB Atlas free tier) for persistence
+const _registrations = [];
 
-function loadRegistrations() {
-  try {
-    if (fs.existsSync(REG_FILE)) {
-      return JSON.parse(fs.readFileSync(REG_FILE, "utf8"));
-    }
-  } catch(e) { console.error("Error loading registrations:", e.message); }
-  return [];
-}
-
-function saveRegistrations(regs) {
-  try { fs.writeFileSync(REG_FILE, JSON.stringify(regs, null, 2)); }
-  catch(e) { console.error("Error saving registrations:", e.message); }
-}
-
-function getRegistrations() {
-  return loadRegistrations();
-}
+function getRegistrations() { return _registrations; }
 
 function addRegistration(reg) {
-  const regs = loadRegistrations();
-  regs.push(reg);
-  saveRegistrations(regs);
-  return regs;
+  _registrations.push(reg);
+  return _registrations;
 }
 
 function approveRegistration(id) {
-  const regs = loadRegistrations();
-  const reg = regs.find(r => r.id === id);
+  const reg = _registrations.find(r => r.id === id);
   if (reg) {
     reg.approved = true;
     reg.approvedAt = new Date().toISOString();
-    saveRegistrations(regs);
     return true;
   }
   return false;
@@ -83,6 +64,65 @@ app.get("/dealer", (req,res) => res.sendFile(path.join(__dirname, "dealer.html")
 app.get("/dealer.html", (req,res) => res.sendFile(path.join(__dirname, "dealer.html")));
 app.get("/register", (req,res) => res.sendFile(path.join(__dirname, "register.html")));
 app.get("/register.html", (req,res) => res.sendFile(path.join(__dirname, "register.html")));
+app.get("/marketplace", (req,res) => res.sendFile(path.join(__dirname, "marketplace.html")));
+app.get("/buyer", (req,res) => res.sendFile(path.join(__dirname, "buyer.html")));
+
+// ── MARKETPLACE API ENDPOINTS ─────────────────────────────────────────────────
+// Get all listings
+app.get("/api/marketplace/listings", generalLimiter, (req,res) => {
+  const { produce, state, status } = req.query;
+  const listings = marketplace.getListings({ produce, state, status });
+  res.json({ listings, total: listings.length });
+});
+
+// Create a listing
+app.post("/api/marketplace/listings", requireAppKey, generalLimiter, express.json(), (req,res) => {
+  try {
+    const listing = marketplace.createListing(req.body);
+    res.json({ success:true, listing });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+// Register a buyer
+app.post("/api/marketplace/buyers/register", generalLimiter, express.json(), (req,res) => {
+  try {
+    const { existing, buyer } = marketplace.registerBuyer(req.body);
+    res.json({ success:true, buyer, message: existing ? "Welcome back!" : "Registration successful!" });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+// Get buyers
+app.get("/api/marketplace/buyers", requireAppKey, generalLimiter, (req,res) => {
+  const { produce, state } = req.query;
+  res.json({ buyers: marketplace.getBuyers({ produce, state }) });
+});
+
+// Create order
+app.post("/api/marketplace/orders", requireAppKey, generalLimiter, express.json(), (req,res) => {
+  try {
+    const order = marketplace.createOrder(req.body);
+    if (!order) return res.status(400).json({ error:"Could not create order. Check listing and buyer IDs." });
+    res.json({ success:true, order });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+// Get orders
+app.get("/api/marketplace/orders", requireAppKey, generalLimiter, (req,res) => {
+  const { farmerPhone, buyerId, status } = req.query;
+  res.json({ orders: marketplace.getOrders({ farmerPhone, buyerId, status }) });
+});
+
+// Update order status
+app.post("/api/marketplace/orders/:id/status", requireAppKey, generalLimiter, express.json(), (req,res) => {
+  const order = marketplace.updateOrder(req.params.id, req.body);
+  if (!order) return res.status(404).json({ error:"Order not found" });
+  res.json({ success:true, order });
+});
+
+// Marketplace stats
+app.get("/api/marketplace/stats", generalLimiter, (req,res) => {
+  res.json(marketplace.getMarketplaceStats());
+});
 app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
