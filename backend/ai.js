@@ -1,5 +1,5 @@
-// ai.js — AgroDoc AI v4.0
-// UPDATED: 30 diseases fully cached, detailed prescriptions, simplified language
+// ai.js — AgroDoc AI v5.0
+// UPDATED: 38 diseases fully cached, detailed prescriptions, simplified language
 const axios = require("axios");
 
 const CACHE_VERSION = "2026.09.v5";
