@@ -66,63 +66,6 @@ app.get("/register", (req,res) => res.sendFile(path.join(__dirname, "register.ht
 app.get("/register.html", (req,res) => res.sendFile(path.join(__dirname, "register.html")));
 app.get("/marketplace", (req,res) => res.sendFile(path.join(__dirname, "marketplace.html")));
 app.get("/buyer", (req,res) => res.sendFile(path.join(__dirname, "buyer.html")));
-
-// ── MARKETPLACE API ENDPOINTS ─────────────────────────────────────────────────
-// Get all listings
-app.get("/api/marketplace/listings", generalLimiter, (req,res) => {
-  const { produce, state, status } = req.query;
-  const listings = marketplace.getListings({ produce, state, status });
-  res.json({ listings, total: listings.length });
-});
-
-// Create a listing
-app.post("/api/marketplace/listings", requireAppKey, generalLimiter, express.json(), (req,res) => {
-  try {
-    const listing = marketplace.createListing(req.body);
-    res.json({ success:true, listing });
-  } catch(e) { res.status(500).json({ error:e.message }); }
-});
-
-// Register a buyer
-app.post("/api/marketplace/buyers/register", generalLimiter, express.json(), (req,res) => {
-  try {
-    const { existing, buyer } = marketplace.registerBuyer(req.body);
-    res.json({ success:true, buyer, message: existing ? "Welcome back!" : "Registration successful!" });
-  } catch(e) { res.status(500).json({ error:e.message }); }
-});
-
-// Get buyers
-app.get("/api/marketplace/buyers", requireAppKey, generalLimiter, (req,res) => {
-  const { produce, state } = req.query;
-  res.json({ buyers: marketplace.getBuyers({ produce, state }) });
-});
-
-// Create order
-app.post("/api/marketplace/orders", requireAppKey, generalLimiter, express.json(), (req,res) => {
-  try {
-    const order = marketplace.createOrder(req.body);
-    if (!order) return res.status(400).json({ error:"Could not create order. Check listing and buyer IDs." });
-    res.json({ success:true, order });
-  } catch(e) { res.status(500).json({ error:e.message }); }
-});
-
-// Get orders
-app.get("/api/marketplace/orders", requireAppKey, generalLimiter, (req,res) => {
-  const { farmerPhone, buyerId, status } = req.query;
-  res.json({ orders: marketplace.getOrders({ farmerPhone, buyerId, status }) });
-});
-
-// Update order status
-app.post("/api/marketplace/orders/:id/status", requireAppKey, generalLimiter, express.json(), (req,res) => {
-  const order = marketplace.updateOrder(req.params.id, req.body);
-  if (!order) return res.status(404).json({ error:"Order not found" });
-  res.json({ success:true, order });
-});
-
-// Marketplace stats
-app.get("/api/marketplace/stats", generalLimiter, (req,res) => {
-  res.json(marketplace.getMarketplaceStats());
-});
 app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
@@ -754,6 +697,56 @@ app.post("/webhook/twilio", whatsappLimiter, express.urlencoded({ extended:false
 app.use((err,req,res,next)=>{if(err.code==="LIMIT_FILE_SIZE")return res.status(400).json({error:"Image too large. Max 8MB."});if(err.message==="Images only")return res.status(400).json({error:"Only image files accepted."});console.error("Error:",err.message);return res.status(500).json({error:"Internal server error."});});
 app.use((req,res)=>res.status(404).json({error:"Route not found."}));
 
+// ── MARKETPLACE API ENDPOINTS ─────────────────────────────────────────────────
+app.get("/api/marketplace/listings", generalLimiter, (req,res) => {
+  const { produce, state, status } = req.query;
+  const listings = marketplace.getListings({ produce, state, status });
+  res.json({ listings, total: listings.length });
+});
+
+app.post("/api/marketplace/listings", requireAppKey, generalLimiter, express.json(), (req,res) => {
+  try {
+    const listing = marketplace.createListing(req.body);
+    res.json({ success:true, listing });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+app.post("/api/marketplace/buyers/register", generalLimiter, express.json(), (req,res) => {
+  try {
+    const { existing, buyer } = marketplace.registerBuyer(req.body);
+    res.json({ success:true, buyer, message: existing ? "Welcome back!" : "Registration successful!" });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+app.get("/api/marketplace/buyers", requireAppKey, generalLimiter, (req,res) => {
+  const { produce, state } = req.query;
+  res.json({ buyers: marketplace.getBuyers({ produce, state }) });
+});
+
+app.post("/api/marketplace/orders", requireAppKey, generalLimiter, express.json(), (req,res) => {
+  try {
+    const order = marketplace.createOrder(req.body);
+    if (!order) return res.status(400).json({ error:"Could not create order." });
+    res.json({ success:true, order });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+app.get("/api/marketplace/orders", requireAppKey, generalLimiter, (req,res) => {
+  const { farmerPhone, buyerId, status } = req.query;
+  res.json({ orders: marketplace.getOrders({ farmerPhone, buyerId, status }) });
+});
+
+app.post("/api/marketplace/orders/:id/status", requireAppKey, generalLimiter, express.json(), (req,res) => {
+  const order = marketplace.updateOrder(req.params.id, req.body);
+  if (!order) return res.status(404).json({ error:"Order not found" });
+  res.json({ success:true, order });
+});
+
+app.get("/api/marketplace/stats", generalLimiter, (req,res) => {
+  res.json(marketplace.getMarketplaceStats());
+});
+
+// ── ALSO FIX AI.JS COMMENT ────────────────────────────────────────────────────
 // FIX #7 — Graceful crash recovery — server never dies silently
 process.on("uncaughtException",err=>console.error("Uncaught:",err.message));
 process.on("unhandledRejection",r=>console.error("Rejection:",r));
