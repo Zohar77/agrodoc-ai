@@ -66,6 +66,7 @@ app.get("/register", (req,res) => res.sendFile(path.join(__dirname, "register.ht
 app.get("/register.html", (req,res) => res.sendFile(path.join(__dirname, "register.html")));
 app.get("/marketplace", (req,res) => res.sendFile(path.join(__dirname, "marketplace.html")));
 app.get("/buyer", (req,res) => res.sendFile(path.join(__dirname, "buyer.html")));
+app.get("/sell", (req,res) => res.sendFile(path.join(__dirname, "sell.html")));
 app.get("/terms", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname, "terms-and-privacy.html")));
 
