@@ -8,6 +8,7 @@ const fs     = require("fs");
 const path   = require("path");
 const { execSync } = require("child_process");
 const { diagnose, tryOfflineCache } = require("./ai");
+const { startListingFlow, handleListingFlow, isInListingFlow, cancelListingFlow } = require("./marketplace");
 
 // Voice notes — load if Google TTS key is available
 let voiceModule = null;
@@ -473,6 +474,25 @@ async function handleWhatsAppMessage(message, contact) {
       } else {
         await sendMessage(phone, (VOICE_FAILED[lang]||VOICE_FAILED.en) + "\n\n" + formatReply(session.lastDiagnosis, session));
       }
+      return;
+    }
+
+    // ── MARKETPLACE: SELL PRODUCE ──────────────────────────────────────────
+    if (low === "cancel" && isInListingFlow(phone)) {
+      cancelListingFlow(phone);
+      await sendMessage(phone, "❌ Listing cancelled. Type *SELL* anytime to list your produce.");
+      return;
+    }
+    if (isInListingFlow(phone)) {
+      const reply = handleListingFlow(phone, textContent);
+      if (reply) { await sendMessage(phone, reply); return; }
+    }
+    if (low === "sell" || low === "sell produce" || low === "list produce") {
+      await sendMessage(phone, startListingFlow(phone, session.name || "Farmer"));
+      return;
+    }
+    if (low === "buy" || low === "market" || low === "marketplace") {
+      await sendMessage(phone, "🛒 *AgroDoc AI Marketplace*\n\nBrowse produce from farmers across Nigeria:\nhttps://agrodoc-ai.onrender.com/marketplace\n\nBuyers can register here:\nhttps://agrodoc-ai.onrender.com/buyer\n\nFarmers: type *SELL* to list your produce.");
       return;
     }
 
