@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AgroDoc AI — Sell Your Produce</title>
+<style>
+:root{--g1:#050e07;--g2:#0a1f10;--lime:#6ee569;--border:rgba(110,229,105,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--g1);color:#e8f5e9;font-family:'Segoe UI',sans-serif;min-height:100vh}
+.hdr{background:var(--g2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:17px;font-weight:800;color:var(--lime)}
+.box{background:var(--g2);border:1px solid var(--border);border-radius:18px;padding:32px;max-width:480px;margin:32px auto}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#e8f5e9;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
+.inp:focus{border-color:rgba(110,229,105,.5)}
+.btn{background:linear-gradient(135deg,#15803d,#22c55e);color:#071209;border:none;padding:13px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;width:100%;font-family:inherit;margin-top:4px}
+.btn:disabled{opacity:.5}
+.label{font-size:11px;color:#3d6b4a;margin-bottom:4px;font-weight:700;display:block}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:10px;display:none}
+.ok{display:none;text-align:center}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo">🌿 AgroDoc AI — Sell Produce</div>
+  <a href="https://agrodoc-ai.vercel.app" style="font-size:12px;color:#3d6b4a;text-decoration:none">← Back to App</a>
+</div>
+<div class="box">
+  <div style="text-align:center;margin-bottom:22px">
+    <div style="font-size:44px;margin-bottom:8px">🌾</div>
+    <div style="font-size:20px;font-weight:800;color:#6ee569">List Your Produce</div>
+    <div style="font-size:13px;color:#3d6b4a;margin-top:6px;line-height:1.55">Buyers across Nigeria will see your listing and call you directly. Free for farmers.</div>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="ok" id="ok">
+    <div style="font-size:40px;margin-bottom:10px">🎉</div>
+    <div style="font-size:18px;font-weight:800;color:#6ee569;margin-bottom:8px">Listing Published!</div>
+    <div style="font-size:13px;color:#86efac;line-height:1.6;margin-bottom:16px">Buyers can now see your produce and call you.</div>
+    <a href="/marketplace" class="btn" style="display:block;text-decoration:none;text-align:center">View Marketplace</a>
+  </div>
+  <div id="form">
+    <span class="label">YOUR NAME *</span>
+    <input class="inp" id="name" placeholder="e.g. Emeka Obi"/>
+    <span class="label">PHONE / WHATSAPP NUMBER *</span>
+    <input class="inp" id="phone" type="tel" placeholder="e.g. 08012345678"/>
+    <span class="label">WHAT ARE YOU SELLING? *</span>
+    <input class="inp" id="produce" placeholder="e.g. Maize, Cassava, Catfish, Tomato"/>
+    <div class="row">
+      <div><span class="label">QUANTITY *</span><input class="inp" id="qty" type="number" min="1" placeholder="e.g. 10"/></div>
+      <div><span class="label">UNIT</span>
+        <select class="inp" id="unit"><option>bags</option><option>kg</option><option>crates</option><option>tubers</option><option>litres</option><option>pieces</option></select></div>
+    </div>
+    <span class="label">PRICE PER UNIT (₦) *</span>
+    <input class="inp" id="price" type="number" min="1" placeholder="e.g. 35000"/>
+    <span class="label">STATE *</span>
+    <input class="inp" id="state" placeholder="e.g. FCT, Kano, Benue"/>
+    <span class="label">LGA / TOWN</span>
+    <input class="inp" id="lga" placeholder="e.g. Gwagwalada"/>
+    <span class="label">NOTES (OPTIONAL)</span>
+    <input class="inp" id="notes" placeholder="e.g. Fresh harvest, can deliver"/>
+    <button class="btn" id="btn" onclick="submitListing()">✅ Publish My Listing</button>
+  </div>
+</div>
+<script>
+const B = "https://agrodoc-ai.onrender.com", APP_KEY = "agrodocai2026master";
+function err(m){const e=document.getElementById("err");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",5000);}
+async function submitListing(){
+  const v = id => document.getElementById(id).value.trim();
+  const d = {farmerName:v("name"),farmerPhone:v("phone"),produce:v("produce"),quantity:v("qty"),unit:v("unit"),pricePerUnit:v("price"),state:v("state"),lga:v("lga"),notes:v("notes")};
+  if(!d.farmerName||!d.farmerPhone||!d.produce||!d.quantity||!d.pricePerUnit||!d.state){err("Please fill in all fields marked *");return;}
+  const btn=document.getElementById("btn");btn.disabled=true;btn.textContent="Publishing...";
+  try{
+    const r=await fetch(B+"/api/marketplace/listings",{method:"POST",headers:{"Content-Type":"application/json","X-App-Key":APP_KEY},body:JSON.stringify(d)});
+    const j=await r.json();
+    if(r.ok&&j.success){document.getElementById("form").style.display="none";document.getElementById("ok").style.display="block";}
+    else{err(j.error||"Could not publish. Try again.");btn.disabled=false;btn.textContent="✅ Publish My Listing";}
+  }catch(e){err("Could not connect. Check your internet.");btn.disabled=false;btn.textContent="✅ Publish My Listing";}
+}
+</script>
+</body>
+</html>
