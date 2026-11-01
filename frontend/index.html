@@ -419,6 +419,7 @@ function init() {
       b.style.background = `linear-gradient(135deg,#${CAT_COLORS[c.id]}cc,#${CAT_COLORS[c.id]})`;
       result = null;
       document.getElementById("result-area").innerHTML = "";
+      renderQuickTags();
     };
     cb.appendChild(b);
   });
@@ -487,10 +488,19 @@ const QUICK_TAGS = {
   livestock:["Goat has sores in mouth", "Cow has skin lumps", "Pig dying suddenly", "Sheep has runny nose", "Cattle losing weight fast"],
 };
 
+const PLACEHOLDERS = {
+  crops:     "Describe what you see on your plants...",
+  poultry:   "Describe what you see on your birds...",
+  fish:      "Describe what you see in your pond or on your fish...",
+  livestock: "Describe what you see on your animal...",
+};
+
 function renderQuickTags() {
   const tags = QUICK_TAGS[category] || QUICK_TAGS.crops;
   const container = document.getElementById("quick-tags");
   if (!container) return;
+  const box = document.getElementById("diag-text");
+  if (box) box.placeholder = PLACEHOLDERS[category] || PLACEHOLDERS.crops;
   container.innerHTML = tags.map(t => `
     <button onclick="setQuickTag('${t}')" style="background:rgba(110,229,105,.06);border:1px solid rgba(110,229,105,.2);color:#6b9e7e;padding:5px 10px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;transition:all .2s;white-space:nowrap">
       ${t}
