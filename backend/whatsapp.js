@@ -259,8 +259,8 @@ const REG_START = {
 
 // ── MESSAGES ──────────────────────────────────────────────────────────────────
 const WELCOME = {
-  en:  `🌿 *Welcome to AgroDoc AI — Your AI Farm Doctor!*\n\nI diagnose diseases on your crops, poultry, fish, and livestock in seconds.\n\n*What is your first name?* 😊\n_(Type your name or send a voice note)_`,
-  pcm: `🌿 *Welcome to AgroDoc AI!*\n\nI be your AI Farm Doctor — I fit diagnose disease for your farm quick quick.\n\n*Wetin be your name?* 😊\n_(Type am or send voice note)_`,
+  en:  `🌿 *Welcome to AgroDoc AI — Your AI Farm Doctor!*\n\nI diagnose diseases on your crops, poultry, fish, and livestock in seconds.\n\n*What is your first name?* 😊\n_(Type your name)_`,
+  pcm: `🌿 *Welcome to AgroDoc AI!*\n\nI be your AI Farm Doctor — I fit diagnose disease for your farm quick quick.\n\n*Wetin be your name?* 😊\n_(Type am)_`,
   ha:  `🌿 *Barka da zuwa AgroDoc AI!*\n\n*Menene sunanka?* 😊`,
   yo:  `🌿 *Ẹ káàbọ̀ sí AgroDoc AI!*\n\n*Kí ni orúkọ rẹ?* 😊`,
   ig:  `🌿 *Nnọọ na AgroDoc AI!*\n\n*Kedu aha gị?* 😊`,
@@ -273,8 +273,10 @@ const ASK_FARM = {
   ig:  (n) => `Nnọọ *${n}!* 👋\n\n*1* 🌿 Ọka\n*2* 🐔 Ọkụkọ\n*3* 🐟 Azụ\n*4* 🐄 Anụ ọhịa\n*5* 🌾 Ọtụtụ ụdị`,
 };
 const REG_DONE = {
-  en:  (n, f) => `✅ *You're all set, ${n}!*\n\nYour farm type: *${f}*\n\n📷 Send a photo of a sick crop or animal\n✍️ Or type what you see\n🎤 Send a voice note\n💡 Type *voice* after any diagnosis to hear it spoken\n💼 Type *register* to list your business in our directory\n\nWhat's the problem on your farm today? 🌾`,
-  pcm: (n, f) => `✅ *${n}, you don set!*\n\nYour farm: *${f}*\n\n📷 Send photo\n✍️ Type wetin you see\n🎤 Send voice note\n💡 Type *voice* to hear diagnosis\n💼 Type *register* to list your business\n\nWetin happen? 🌾`,
+  en:  (n, f) => `✅ *You're all set, ${n}!*\n\nYour farm type: *${f}*\n\n📷 Send a photo of a sick crop or animal\n✍️ Or type what you see\n🎤 Tap the microphone on your keyboard to speak — it types your words
+💡 Type *voice* after any diagnosis to hear it spoken\n💼 Type *register* to list your business in our directory\n\nWhat's the problem on your farm today? 🌾`,
+  pcm: (n, f) => `✅ *${n}, you don set!*\n\nYour farm: *${f}*\n\n📷 Send photo\n✍️ Type wetin you see\n🎤 Tap the microphone for your keyboard to talk — e go type am for you
+💡 Type *voice* to hear diagnosis\n💼 Type *register* to list your business\n\nWetin happen? 🌾`,
   ha:  (n, f) => `✅ *${n}, kun shirya!*\n\nGonarka: *${f}*\n\nAika hoto ko rubuta bayani.\nRubuta *voice* don jin ganewar.\nRubuta *register* don rajista.`,
   yo:  (n, f) => `✅ *${n}, o ti ṣetan!*\n\nOko rẹ: *${f}*\n\nFi fọto ranṣẹ tabi kọ awọn aami aisan.\nKọ *voice* lati gbọ iwadii.\nKọ *register* lati forukọsilẹ.`,
   ig:  (n, f) => `✅ *${n}, ị dị njikere!*\n\nUgbo gị: *${f}*\n\nZiga foto ma ọ bụ dee ihe ị na-ahụ.\nDee *voice* iji nụ nchọpụta.\nDee *register* iji debanye aha gị.`,
@@ -604,8 +606,8 @@ async function handleWhatsAppMessage(message, contact) {
   // Voice note (during normal conversation)
   if (msgType === "audio") {
     const voicePrompt = {
-      en:`🎤 ${name?`Thanks ${name}!`:"Thanks!"} I heard your voice note.\n\nTo diagnose, please *send a photo* or *type* what you see.\n\nExample: _"yellow leaves on my cassava"_\n\n💡 After a diagnosis, type *voice* to hear it spoken back.`,
-      pcm:`🎤 ${name?`${name} thanks!`:"Thanks!"} I hear your voice.\n\nAbeg *send photo* or *type* wetin you see.\n\nAfter diagnosis, type *voice* to hear am.`,
+      en:`🎤 ${name?`Thanks ${name}!`:"Thanks!"} I cannot understand voice notes yet.\n\nTo speak instead of typing: tap the *🎤 microphone on your keyboard*, say what you see, and send the words it types.\n\nOr *send a photo* of the problem.\n\nExample: _"yellow leaves on my cassava"_`,
+      pcm:`🎤 ${name?`${name} thanks!`:"Thanks!"} I never fit understand voice note yet.\n\nIf you wan talk: press the *🎤 microphone for your keyboard*, talk wetin you see, then send the words wey e type.\n\nOr *send photo* of the problem.`,
       ha:`🎤 Na gode! Aika hoto ko rubuta bayani. Bayan ganewar, rubuta *voice* don jin ta.`,
       yo:`🎤 E se! Fi fọto ranṣẹ tabi kọ ohun ti o rii. Lẹhin iwadii, kọ *voice* lati gbọ.`,
       ig:`🎤 Daalu! Ziga foto ma ọ bụ dee ihe ị na-ahụ. Mgbe nchọpụta gasịrị, dee *voice* iji nụ.`,
