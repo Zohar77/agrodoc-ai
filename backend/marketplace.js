@@ -276,6 +276,7 @@ function cancelListingFlow(phone) {
 }
 
 module.exports = {
+  _stores: { listings, buyers, orders },
   createListing, getListings, getListing, updateListing,
   registerBuyer, getBuyers, getBuyer,
   createOrder, getOrders, updateOrder,
