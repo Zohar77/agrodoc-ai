@@ -17,32 +17,21 @@ const multer     = require("multer");
 const crypto     = require("crypto");
 const path       = require("path");
 const { diagnose, tryOfflineCache, CACHE_VERSION } = require("./ai");
-const { handleWhatsAppMessage, isWhatsAppRateLimited } = require("./whatsapp");
+const { handleWhatsAppMessage, isWhatsAppRateLimited, getRegistrations } = require("./whatsapp");
+const persist = require("./persist");
 const marketplace = require("./marketplace");
 
-// ── IN-MEMORY REGISTRATION STORE ─────────────────────────────────────────────
-// Note: Render free tier resets memory on restart — upgrade to paid tier
-// or add a database (MongoDB Atlas free tier) for persistence
-const _registrations = [];
-
-function getRegistrations() { return _registrations; }
-
-function addRegistration(reg) {
-  _registrations.push(reg);
-  return _registrations;
-}
-
+// ── REGISTRATIONS — one shared list (web + WhatsApp), saved by persist.js ───────
+function addRegistration(reg) { getRegistrations().push(reg); return getRegistrations(); }
 function approveRegistration(id) {
-  const reg = _registrations.find(r => r.id === id);
-  if (reg) {
-    reg.approved = true;
-    reg.approvedAt = new Date().toISOString();
-    return true;
-  }
+  const reg = getRegistrations().find(r => r.id === id);
+  if (reg) { reg.approved = true; reg.approvedAt = new Date().toISOString(); return true; }
   return false;
 }
+function digits(p) { return String(p||"").replace(/\D/g, "").slice(-10); }
 
 const app  = express();
+app.set("trust proxy", 1); // Render sits behind a proxy — needed for correct client IPs
 const PORT = process.env.PORT || 3000;
 const APP_KEY = process.env.APP_KEY;
 
@@ -73,6 +62,7 @@ app.get("/terms-and-privacy.html", (req,res) => res.sendFile(path.join(__dirname
 const ALLOWED = [
   "https://agrodoc-ai.vercel.app",
   "https://agrodoc-ai-y943.vercel.app",
+  "https://agrodoc-ai.onrender.com", // the portal, register, buyer and sell pages are served from here
   "http://localhost:3000",
   "http://localhost:5173",
   ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",").map(s=>s.trim()) : ["*"]),
@@ -101,8 +91,8 @@ function requireAppKey(req,res,next){
 }
 
 // ── RATE LIMITERS ─────────────────────────────────────────────────────────────
-const lim = (w,m,msg,keyFn)=>rateLimit({windowMs:w,max:m,message:{error:msg},keyGenerator:keyFn||(req=>req.headers["x-session-token"]||req.ip),standardHeaders:true,legacyHeaders:false});
-const diagnoseLimiter  = lim(15*60*1000,30,"Too many diagnoses. Wait 15 minutes.");
+const lim = (w,m,msg,keyFn)=>rateLimit({windowMs:w,max:m,message:{error:msg},keyGenerator:keyFn||(req=>req.ip),standardHeaders:true,legacyHeaders:false});
+const diagnoseLimiter  = lim(15*60*1000,60,"Too many diagnoses. Wait 15 minutes.");
 const feedbackLimiter  = lim(60*60*1000,100,"Too many feedback submissions.");
 const whatsappLimiter  = lim(60*1000,60,"WhatsApp rate limit.");
 const generalLimiter   = lim(60*1000,120,"Too many requests.");
@@ -427,8 +417,8 @@ app.post("/api/dealer/login", generalLimiter, express.json(), (req,res) => {
 
   const regs = getRegistrations();
   const dealer = regs.find(r =>
-    r.phone === phone &&
-    r.businessName.toLowerCase() === businessName.toLowerCase()
+    (digits(r.phone) === digits(phone) || digits(r.contactPhone) === digits(phone)) &&
+    String(r.businessName||"").toLowerCase() === businessName.toLowerCase()
   );
 
   if (!dealer) return res.status(401).json({ error:"Business not found. Please register first at agrodoc-ai.onrender.com/register or check your business name and phone number." });
@@ -696,8 +686,6 @@ app.post("/webhook/twilio", whatsappLimiter, express.urlencoded({ extended:false
 
 // Error handling
 app.use((err,req,res,next)=>{if(err.code==="LIMIT_FILE_SIZE")return res.status(400).json({error:"Image too large. Max 8MB."});if(err.message==="Images only")return res.status(400).json({error:"Only image files accepted."});console.error("Error:",err.message);return res.status(500).json({error:"Internal server error."});});
-app.use((req,res)=>res.status(404).json({error:"Route not found."}));
-
 // ── MARKETPLACE API ENDPOINTS ─────────────────────────────────────────────────
 app.get("/api/marketplace/listings", generalLimiter, (req,res) => {
   const { produce, state, status } = req.query;
@@ -747,11 +735,23 @@ app.get("/api/marketplace/stats", generalLimiter, (req,res) => {
   res.json(marketplace.getMarketplaceStats());
 });
 
+
+app.use((req,res)=>res.status(404).json({error:"Route not found."}));
+
 // ── ALSO FIX AI.JS COMMENT ────────────────────────────────────────────────────
 // FIX #7 — Graceful crash recovery — server never dies silently
 process.on("uncaughtException",err=>console.error("Uncaught:",err.message));
 process.on("unhandledRejection",r=>console.error("Rejection:",r));
 
+async function boot(){
+  await persist.init();
+  await persist.track("registrations", getRegistrations());
+  await persist.track("listings", marketplace._stores.listings);
+  await persist.track("buyers", marketplace._stores.buyers);
+  await persist.track("orders", marketplace._stores.orders);
+  await persist.track("feedback", feedbackStore);
+  await persist.track("auditlog", auditLog);
+  persist.start();
 const server=app.listen(PORT,()=>console.log(`
 🌿 AgroDoc AI Backend v3.0 — All 19 Loopholes Fixed
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -772,4 +772,6 @@ const server=app.listen(PORT,()=>console.log(`
 `));
 server.keepAliveTimeout=65000;
 server.headersTimeout=66000;
+}
+boot();
 module.exports=app;
