@@ -166,6 +166,12 @@ body{background:#050e07;color:#e8f5e9;font-family:'Outfit',sans-serif;min-height
 
       <textarea class="ta" id="diag-text" rows="3" placeholder="Describe what you see on your farm..." style="margin-bottom:8px"></textarea>
 
+      <!-- Voice input -->
+      <div id="mic-row" style="display:none;align-items:center;gap:10px;margin-bottom:10px">
+        <button class="sbtn" id="mic-btn" onclick="startVoiceInput()">🎤 Speak</button>
+        <div style="font-size:10.5px;color:#3d6b4a;line-height:1.4">Tap and describe the problem in your language. You can also use the 🎤 on your phone keyboard.</div>
+      </div>
+
       <!-- Quick tag prompts -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="quick-tags"></div>
 
@@ -340,7 +346,8 @@ let speaking = false;
 let history  = JSON.parse(localStorage.getItem("agrodoc_history") || "[]");
 let journal  = JSON.parse(localStorage.getItem("agrodoc_journal") || "[]");
 let userLocation = null;
-let notifEnabled = Notification.permission === "granted";
+// iPhone Safari has no Notification feature unless the app is added to the Home Screen — never assume it exists
+let notifEnabled = ("Notification" in window) && Notification.permission === "granted";
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 const LANGUAGES = {
@@ -434,9 +441,42 @@ function init() {
   renderJournalList();
   updateNotifUI();
   renderQuickTags();
+  if (SR) document.getElementById("mic-row").style.display = "flex";
   updateOfflineIndicator();
   window.addEventListener("online",  updateOfflineIndicator);
   window.addEventListener("offline", updateOfflineIndicator);
+}
+
+// ─── VOICE INPUT (speech to text) ─────────────────────────────────────────────
+// Uses the phone browser's own speech recognition (Chrome on Android uses Google's engine).
+// Free, no key needed. Hausa/Yoruba/Igbo support depends on the phone — test on real devices.
+const SPEECH_LANGS = { en:"en-NG", pcm:"en-NG", ha:"ha-NG", yo:"yo-NG", ig:"ig-NG" };
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognising = false, recog = null;
+
+function startVoiceInput() {
+  if (!SR) { showToast("⚠️ Use the 🎤 on your keyboard to speak"); return; }
+  const btn = document.getElementById("mic-btn");
+  if (recognising && recog) { recog.stop(); return; }
+  recog = new SR();
+  recog.lang = SPEECH_LANGS[lang] || "en-NG";
+  recog.interimResults = false;
+  recog.maxAlternatives = 1;
+  recog.onstart = () => { recognising = true; btn.textContent = "⏹ Listening... tap to stop"; };
+  recog.onend   = () => { recognising = false; btn.textContent = "🎤 Speak"; };
+  recog.onresult = e => {
+    const said = e.results[0][0].transcript;
+    const box = document.getElementById("diag-text");
+    box.value = (box.value ? box.value + " " : "") + said;
+    showToast("✅ Check the words, then tap Diagnose");
+  };
+  recog.onerror = e => {
+    recognising = false; btn.textContent = "🎤 Speak";
+    if (e.error === "language-not-supported") showToast("⚠️ This phone cannot hear " + (LANGUAGES[lang]||"this language") + ". Use the 🎤 on your keyboard.");
+    else if (e.error === "not-allowed" || e.error === "service-not-allowed") showToast("⚠️ Allow the microphone and try again");
+    else if (e.error !== "no-speech" && e.error !== "aborted") showToast("⚠️ Could not hear you. Try again or type.");
+  };
+  try { recog.start(); } catch { showToast("⚠️ Could not start the microphone"); }
 }
 
 // ─── QUICK TAGS ───────────────────────────────────────────────────────────────
@@ -888,7 +928,7 @@ function toggleNotif() {
 }
 
 async function enableNotifications() {
-  if (!("Notification" in window)) { showToast("⚠️ Notifications not supported on this browser"); return; }
+  if (!("Notification" in window)) { showToast("ℹ️ On iPhone: tap Share, then Add to Home Screen, then open from there"); return; }
   const perm = await Notification.requestPermission();
   if (perm === "granted") {
     notifEnabled = true;
