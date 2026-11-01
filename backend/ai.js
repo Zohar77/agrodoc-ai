@@ -742,8 +742,18 @@ Make the description warm, encouraging and specific to the crop or animal — no
 All text fields in the selected language EXCEPT subject (always English).`;
 }
 
+// ── DAILY SPENDING CAP — protects your Anthropic credit from runaway use ───────
+let _capDay = new Date().toDateString(), _capCount = 0;
+function checkDailyCap() {
+  const d = new Date().toDateString();
+  if (d !== _capDay) { _capDay = d; _capCount = 0; }
+  const cap = parseInt(process.env.DAILY_AI_CAP, 10) || 1500;
+  if (++_capCount > cap) throw new Error("Daily AI limit reached. Please try again tomorrow.");
+}
+
 // ── MAIN DIAGNOSE FUNCTION ────────────────────────────────────────────────────
 async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", mode="farmer", category="crops" }) {
+  checkDailyCap();
   const content = [];
 
   if (imageBase64) {
