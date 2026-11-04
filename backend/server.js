@@ -215,7 +215,7 @@ app.post("/api/diagnose",requireAppKey,diagnoseLimiter,express.json({limit:"15mb
     const diagnosisId=crypto.randomBytes(8).toString("hex");
 
     // Try offline cache first
-    if(!imageBase64&&text){
+    if(process.env.CACHE_FIRST==="true"&&!imageBase64&&text){
       const cached=tryOfflineCache(text);
       if(cached){
         session.diagnosisCount++;
