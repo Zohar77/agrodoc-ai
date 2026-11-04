@@ -747,7 +747,7 @@ let _capDay = new Date().toDateString(), _capCount = 0;
 function checkDailyCap() {
   const d = new Date().toDateString();
   if (d !== _capDay) { _capDay = d; _capCount = 0; }
-  const cap = parseInt(process.env.DAILY_AI_CAP, 10) || 1500;
+  const cap = parseInt(process.env.DAILY_AI_CAP, 10) || 300;
   if (++_capCount > cap) throw new Error("Daily AI limit reached. Please try again tomorrow.");
 }
 
