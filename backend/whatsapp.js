@@ -561,12 +561,9 @@ async function handleWhatsAppMessage(message, contact) {
 
   // Text diagnosis
   if (msgType === "text" && textContent.length > 2) {
-    const cached = tryOfflineCache(textContent);
-    if (cached) {
-      session.lastDiagnosis = cached;
-      await sendMessage(phone, formatReply(cached, session) + "\n\n_⚡ Quick result — send a photo for full AI analysis_");
-      session.diagnosisCount++;
-      return;
+    if (process.env.CACHE_FIRST === "true") {
+      const cached = tryOfflineCache(textContent);
+      if (cached) { session.lastDiagnosis = cached; await sendMessage(phone, formatReply(cached, session)); session.diagnosisCount++; return; }
     }
     await sendMessage(phone, (ANALYSING[lang]||ANALYSING.en)(name));
     try {
@@ -577,7 +574,12 @@ async function handleWhatsAppMessage(message, contact) {
       session.diagnosisCount++;
       // Send voice note after text diagnosis
       await trySendVoiceNote(phone, result, lang);
-    } catch { await sendMessage(phone, ERROR_MSG[lang]||ERROR_MSG.en); }
+    } catch {
+      // AI unavailable — fall back to the saved quick answers if one matches
+      const backup = tryOfflineCache(textContent);
+      if (backup) { session.lastDiagnosis = backup; await sendMessage(phone, formatReply(backup, session) + "\n\n_Quick answer only (English). The full AI check is not available right now._"); session.diagnosisCount++; }
+      else await sendMessage(phone, ERROR_MSG[lang]||ERROR_MSG.en);
+    }
     return;
   }
 
