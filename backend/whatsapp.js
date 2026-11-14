@@ -222,7 +222,7 @@ function formatReply(result, session) {
   if (result.prevention) lines.push(`\n🛡 *Prevention:* ${result.prevention}`);
   if (result.disclaimer) lines.push(`\n${result.disclaimer}`);
   lines.push(`\n_Diagnosed by AgroDoc AI 🌿_`);
-  lines.push(`\n💡 _Type *voice* to hear this diagnosis spoken aloud_`);
+  lines.push(``);
   return lines.join("\n");
 }
 
@@ -274,12 +274,12 @@ const ASK_FARM = {
 };
 const REG_DONE = {
   en:  (n, f) => `✅ *You're all set, ${n}!*\n\nYour farm type: *${f}*\n\n📷 Send a photo of a sick crop or animal\n✍️ Or type what you see\n🎤 Tap the microphone on your keyboard to speak — it types your words
-💡 Type *voice* after any diagnosis to hear it spoken\n💼 Type *register* to list your business in our directory\n\nWhat's the problem on your farm today? 🌾`,
+💼 Type *register* to list your business in our directory\n\nWhat's the problem on your farm today? 🌾`,
   pcm: (n, f) => `✅ *${n}, you don set!*\n\nYour farm: *${f}*\n\n📷 Send photo\n✍️ Type wetin you see\n🎤 Tap the microphone for your keyboard to talk — e go type am for you
-💡 Type *voice* to hear diagnosis\n💼 Type *register* to list your business\n\nWetin happen? 🌾`,
-  ha:  (n, f) => `✅ *${n}, kun shirya!*\n\nGonarka: *${f}*\n\nAika hoto ko rubuta bayani.\nRubuta *voice* don jin ganewar.\nRubuta *register* don rajista.`,
-  yo:  (n, f) => `✅ *${n}, o ti ṣetan!*\n\nOko rẹ: *${f}*\n\nFi fọto ranṣẹ tabi kọ awọn aami aisan.\nKọ *voice* lati gbọ iwadii.\nKọ *register* lati forukọsilẹ.`,
-  ig:  (n, f) => `✅ *${n}, ị dị njikere!*\n\nUgbo gị: *${f}*\n\nZiga foto ma ọ bụ dee ihe ị na-ahụ.\nDee *voice* iji nụ nchọpụta.\nDee *register* iji debanye aha gị.`,
+💼 Type *register* to list your business\n\nWetin happen? 🌾`,
+  ha:  (n, f) => `✅ *${n}, kun shirya!*\n\nGonarka: *${f}*\n\nAika hoto ko rubuta bayani.\nRubuta *register* don rajista.`,
+  yo:  (n, f) => `✅ *${n}, o ti ṣetan!*\n\nOko rẹ: *${f}*\n\nFi fọto ranṣẹ tabi kọ awọn aami aisan.\nKọ *register* lati forukọsilẹ.`,
+  ig:  (n, f) => `✅ *${n}, ị dị njikere!*\n\nUgbo gị: *${f}*\n\nZiga foto ma ọ bụ dee ihe ị na-ahụ.\nDee *register* iji debanye aha gị.`,
 };
 const ANALYSING = {
   en:  (n) => `🔬 Analysing${n ? ` ${n}` : ""}... Please wait a moment.`,
@@ -439,6 +439,32 @@ async function handleWhatsAppMessage(message, contact) {
   const session = getSession(phone);
   const textContent = message.text?.body?.trim() || message.image?.caption?.trim() || "";
 
+  // ── LANGUAGE MENU — shown on first contact, and any time the farmer types LANGUAGE ──
+  {
+    const low0 = msgType === "text" ? textContent.toLowerCase() : "";
+    const NUM2LANG  = { "1":"en", "2":"pcm", "3":"ha", "4":"yo", "5":"ig" };
+    const NAME2LANG = { english:"en", pidgin:"pcm", hausa:"ha", yoruba:"yo", igbo:"ig" };
+    const LANG_WORD = { en:"english", pcm:"pidgin", ha:"hausa", yo:"yoruba", ig:"igbo" };
+    const LIST = "1️⃣ English\n2️⃣ Pidgin\n3️⃣ Hausa\n4️⃣ Yoruba\n5️⃣ Igbo";
+    const MENU = "🌿 *Welcome to AgroDoc AI*\n\nChoose your language. Reply with a number:\n\n" + LIST + "\n\n_Type *LANGUAGE* any time to change it._";
+    if (low0 === "language" || low0 === "lang" || low0 === "change language") {
+      session.awaitLang = true; await sendMessage(phone, MENU); return;
+    }
+    if (session.status === "new" && !session.langChosen && !session.awaitLang) {
+      session.awaitLang = true; await sendMessage(phone, MENU); return;
+    }
+    if (session.awaitLang) {
+      const chosen = NUM2LANG[low0] || NAME2LANG[low0];
+      if (!chosen) { await sendMessage(phone, "Please reply with a number from 1 to 5:\n\n" + LIST); return; }
+      const wasNew = session.status === "new";
+      session.lang = chosen; session.langChosen = true; session.awaitLang = false;
+      // reuse the existing language-switch confirmation, then start the normal welcome for new farmers
+      await handleWhatsAppMessage({ ...message, type:"text", text:{ body: LANG_WORD[chosen] } }, contact);
+      if (wasNew) await handleWhatsAppMessage({ ...message, type:"text", text:{ body:"hi" } }, contact);
+      return;
+    }
+  }
+
   // Auto-detect language on first contact
   if (session.status === "new" || !session.lang) {
     const detected = detectLang(textContent);
@@ -480,7 +506,10 @@ async function handleWhatsAppMessage(message, contact) {
     }
 
     // ── MARKETPLACE: SELL PRODUCE ──────────────────────────────────────────
-    if (low === "cancel" && isInListingFlow(phone)) {
+    if (isInListingFlow(phone) && (low === "help" || low === "menu" || low === "hi" || low === "hello")) {
+      cancelListingFlow(phone); // leave the SELL steps and carry on normally
+    }
+    if ((low === "cancel" || low === "stop") && isInListingFlow(phone)) {
       cancelListingFlow(phone);
       await sendMessage(phone, "❌ Listing cancelled. Type *SELL* anytime to list your produce.");
       return;
@@ -518,20 +547,20 @@ async function handleWhatsAppMessage(message, contact) {
     // ── HELP ────────────────────────────────────────────────────────────────
     if (["hi","hello","help","start","hey"].some(w => low.includes(w)) && session.status === "registered") {
       const helpMsg = {
-        en:  `🌿 *AgroDoc AI — Quick Guide*\n\n📷 *Diagnose:* Send a photo of sick crop/animal\n✍️ *Describe:* Type what you see\n🔊 *Voice:* Type *voice* after a diagnosis to hear it\n💼 *Register:* Type *register* to list your business\n\n*Change language:* hausa · yoruba · igbo · pidgin · english`,
-        pcm: `🌿 *AgroDoc AI — Quick Guide*\n\n📷 Send photo of sick crop/animal\n✍️ Type wetin you see\n🔊 Type *voice* to hear diagnosis\n💼 Type *register* to list your business`,
-        ha:  `🌿 *AgroDoc AI*\n\n📷 Aika hoto\n✍️ Rubuta bayani\n🔊 Rubuta *voice* don jin ganewar\n💼 Rubuta *register* don rajista`,
-        yo:  `🌿 *AgroDoc AI*\n\n📷 Fi fọto ranṣẹ\n✍️ Kọ awọn aami aisan\n🔊 Kọ *voice* lati gbọ\n💼 Kọ *register* lati forukọsilẹ`,
-        ig:  `🌿 *AgroDoc AI*\n\n📷 Ziga foto\n✍️ Dee ihe ị na-ahụ\n🔊 Dee *voice* iji nụ\n💼 Dee *register* iji debanye aha`,
+        en:  `🌿 *AgroDoc AI — Quick Guide*\n\n📷 *Diagnose:* Send a photo of sick crop/animal\n✍️ *Describe:* Type what you see\n💼 *Register:* Type *register* to list your business\n\n*Change language:* hausa · yoruba · igbo · pidgin · english`,
+        pcm: `🌿 *AgroDoc AI — Quick Guide*\n\n📷 Send photo of sick crop/animal\n✍️ Type wetin you see\n💼 Type *register* to list your business`,
+        ha:  `🌿 *AgroDoc AI*\n\n📷 Aika hoto\n✍️ Rubuta bayani\n💼 Rubuta *register* don rajista`,
+        yo:  `🌿 *AgroDoc AI*\n\n📷 Fi fọto ranṣẹ\n✍️ Kọ awọn aami aisan\n💼 Kọ *register* lati forukọsilẹ`,
+        ig:  `🌿 *AgroDoc AI*\n\n📷 Ziga foto\n✍️ Dee ihe ị na-ahụ\n💼 Dee *register* iji debanye aha`,
       };
-      await sendMessage(phone, helpMsg[lang]||helpMsg.en);
+      await sendMessage(phone, (helpMsg[lang]||helpMsg.en) + "\n\n🌐 *LANGUAGE* — English · Pidgin · Hausa · Yoruba · Igbo");
       return;
     }
 
     // Skip registration
     if (["skip","just diagnose"].some(w => low.includes(w)) && session.status !== "registered") {
       session.status = "registered";
-      const skipMsg = { en:"👋 No problem! Send a photo or describe your farm problem.\n\n💡 Tip: Type *voice* after any diagnosis to hear it spoken.", pcm:"👋 No wahala! Send photo or type wetin you see.", ha:"👋 Babu matsala! Aika hoto ko rubuta bayani.", yo:"👋 Ko sí ìṣòro! Fi fọto ranṣẹ.", ig:"👋 Ọ dịghị nsogbu! Ziga foto." };
+      const skipMsg = { en:"👋 No problem! Send a photo or describe your farm problem.", pcm:"👋 No wahala! Send photo or type wetin you see.", ha:"👋 Babu matsala! Aika hoto ko rubuta bayani.", yo:"👋 Ko sí ìṣòro! Fi fọto ranṣẹ.", ig:"👋 Ọ dịghị nsogbu! Ziga foto." };
       await sendMessage(phone, skipMsg[lang]||skipMsg.en);
       return;
     }
@@ -610,9 +639,9 @@ async function handleWhatsAppMessage(message, contact) {
     const voicePrompt = {
       en:`🎤 ${name?`Thanks ${name}!`:"Thanks!"} I cannot understand voice notes yet.\n\nTo speak instead of typing: tap the *🎤 microphone on your keyboard*, say what you see, and send the words it types.\n\nOr *send a photo* of the problem.\n\nExample: _"yellow leaves on my cassava"_`,
       pcm:`🎤 ${name?`${name} thanks!`:"Thanks!"} I never fit understand voice note yet.\n\nIf you wan talk: press the *🎤 microphone for your keyboard*, talk wetin you see, then send the words wey e type.\n\nOr *send photo* of the problem.`,
-      ha:`🎤 Na gode! Aika hoto ko rubuta bayani. Bayan ganewar, rubuta *voice* don jin ta.`,
-      yo:`🎤 E se! Fi fọto ranṣẹ tabi kọ ohun ti o rii. Lẹhin iwadii, kọ *voice* lati gbọ.`,
-      ig:`🎤 Daalu! Ziga foto ma ọ bụ dee ihe ị na-ahụ. Mgbe nchọpụta gasịrị, dee *voice* iji nụ.`,
+      ha:`🎤 Na gode! Aika hoto ko rubuta bayani.`,
+      yo:`🎤 E se! Fi fọto ranṣẹ tabi kọ ohun ti o rii.`,
+      ig:`🎤 Daalu! Ziga foto ma ọ bụ dee ihe ị na-ahụ.`,
     };
     await sendMessage(phone, voicePrompt[lang]||voicePrompt.en);
     return;
