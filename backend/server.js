@@ -247,8 +247,8 @@ app.post("/api/diagnose",requireAppKey,diagnoseLimiter,express.json({limit:"15mb
     console.error("Diagnosis error:",err.message);
     const text=req.body?.text?sanitiseText(req.body.text):"";
     const cached=text?tryOfflineCache(text):null;
-    if(cached)return res.json({...cached,source:"cache_fallback"});
-    return res.status(500).json({error:"Diagnosis failed. Please check your connection and try again."});
+    if(cached)return res.json({...cached,source:"cache_fallback",notice:"Quick saved answer only — this is NOT a full AI check and may not match your problem. The AI doctor is unavailable right now. For serious problems, contact a vet or your state ADP office."});
+    return res.status(503).json({error:"The AI doctor is not available right now. Please try again later. For urgent problems, contact a vet or your state ADP office."});
   }
 });
 
