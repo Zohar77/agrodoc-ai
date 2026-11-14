@@ -716,6 +716,8 @@ IMPORTANT RULES — NEVER SKIP:
 2. For notifiable diseases (Newcastle, FMD, PPR, ASF, CBPP, TiLV, Marek's) ALWAYS tell the farmer to contact their state veterinary office immediately
 3. For all chemical/drug recommendations, always include the specific mixing rate and frequency
 4. Write treatment steps as if explaining to someone who has never done this before — be specific and practical
+5. Keep product and brand names (for example Confidor, Ridomil), numbers and units (for example 10ml, 15 litres) exactly as written — never translate or change them
+6. If the farmer's own message is clearly written in Hausa, Yoruba, Igbo or Pidgin, answer in that same language even if another language was selected
 
 Return ONLY raw JSON (no markdown, no backticks, no extra text):
 {
