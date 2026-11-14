@@ -629,7 +629,10 @@ async function diagnose() {
     });
     clearTimeout(tid);
 
-    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Server error ${res.status}`);
+    }
     const data = await res.json();
     result = { ...data, date: new Date().toLocaleDateString(), imgPreview, lang, category };
     history = [result, ...history.slice(0, 19)];
@@ -641,8 +644,8 @@ async function diagnose() {
     document.getElementById("result-area").innerHTML = `
       <div class="card fi" style="margin-top:16px;border-color:rgba(248,113,113,.3)">
         <div style="font-size:22px;margin-bottom:8px">⚠️</div>
-        <div style="font-weight:700;color:#f87171;margin-bottom:6px">Connection Error</div>
-        <div style="font-size:13px;color:#fca5a5">${err.name === "AbortError" ? "Request timed out. Try describing the problem in text." : err.message}</div>
+        <div style="font-weight:700;color:#f87171;margin-bottom:6px">${err.name === "AbortError" || err.message === "Failed to fetch" ? "Connection problem" : "Could not diagnose"}</div>
+        <div style="font-size:13px;color:#fca5a5;line-height:1.6">${err.name === "AbortError" ? "The request took too long. Check your signal and try again." : err.message === "Failed to fetch" ? "Could not reach the server. Check your internet and try again." : err.message}</div>
       </div>`;
   }
 
@@ -684,6 +687,9 @@ function renderResult() {
     </div>`;
   }
 
+  if (result.notice) {
+    html += `<div style="background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.3);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#fde68a;line-height:1.5">⚡ ${result.notice}</div>`;
+  }
   if (result.disclaimer) {
     html += `<div class="disclaimer">⚠️ ${result.disclaimer}</div>`;
   }
