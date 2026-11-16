@@ -16,7 +16,7 @@ const rateLimit  = require("express-rate-limit");
 const multer     = require("multer");
 const crypto     = require("crypto");
 const path       = require("path");
-const { diagnose, tryOfflineCache, CACHE_VERSION } = require("./ai");
+const { diagnose, tryOfflineCache, CACHE_VERSION, getAiStatus } = require("./ai");
 const { handleWhatsAppMessage, isWhatsAppRateLimited, getRegistrations } = require("./whatsapp");
 const persist = require("./persist");
 const marketplace = require("./marketplace");
@@ -160,7 +160,7 @@ let MARKET_PRICES=[
 // ══════════════════════════════════════════════════════════════════════════════
 
 // FIX #7 — Health checks enable DNS failover to backup server
-app.get("/health",(req,res)=>res.json({status:"ok",service:"AgroDoc AI API",version:"3.0.0",timestamp:new Date().toISOString(),uptime_seconds:Math.floor(process.uptime()),memory_mb:Math.round(process.memoryUsage().heapUsed/1024/1024),sessions_active:sessions.size,total_diagnoses:auditLog.length,feedback_count:feedbackStore.length,ai_configured:!!process.env.ANTHROPIC_API_KEY,whatsapp_configured:!!process.env.WHATSAPP_TOKEN,cache_version:CACHE_VERSION}));
+app.get("/health",(req,res)=>res.json({status:"ok",service:"AgroDoc AI API",version:"3.0.0",timestamp:new Date().toISOString(),uptime_seconds:Math.floor(process.uptime()),memory_mb:Math.round(process.memoryUsage().heapUsed/1024/1024),sessions_active:sessions.size,total_diagnoses:auditLog.length,feedback_count:feedbackStore.length,ai_configured:!!process.env.ANTHROPIC_API_KEY,ai_status:getAiStatus(),whatsapp_configured:!!process.env.WHATSAPP_TOKEN,cache_version:CACHE_VERSION}));
 app.get("/ping",(req,res)=>res.json({status:"ok",ts:Date.now()}));
 
 // Privacy policy
