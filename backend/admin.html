@@ -235,6 +235,7 @@ async function loadAll(){
       <div class="health-row"><span>Status</span><span class="hval" style="color:var(--lime)">🟢 LIVE</span></div>
       <div class="health-row"><span>Version</span><span class="hval">${healthData.version||'3.0.0'}</span></div>
       <div class="health-row"><span>AI Engine</span><span class="hval">${healthData.ai_configured?'✅ Connected':'❌ Not set'}</span></div>
+      <div class="health-row"><span>AI last call</span><span class="hval" style="max-width:62%;text-align:right;font-size:12px">${healthData.ai_status?(healthData.ai_status.ok===true?'✅ Working':healthData.ai_status.ok===false?'❌ '+healthData.ai_status.message:'⏳ No call yet'):'—'}</span></div>
       <div class="health-row"><span>WhatsApp</span><span class="hval">${healthData.whatsapp_configured?'✅ Live':'⏳ Pending'}</span></div>
       <div class="health-row"><span>Cache</span><span class="hval">${healthData.cache_version||'—'}</span></div>
       <div class="health-row"><span>Memory</span><span class="hval">${healthData.memory_mb||'—'} MB</span></div>
