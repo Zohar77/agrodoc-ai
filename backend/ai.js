@@ -745,6 +745,9 @@ All text fields in the selected language EXCEPT subject (always English).`;
 }
 
 // ── DAILY SPENDING CAP — protects your Anthropic credit from runaway use ───────
+let _aiStatus = { ok: null, at: null, message: "No AI call yet since the server started" };
+function getAiStatus() { return _aiStatus; }
+function _setAi(ok, message) { _aiStatus = { ok, at: new Date().toISOString(), message: String(message || "").slice(0, 160) }; }
 let _capDay = new Date().toDateString(), _capCount = 0;
 function checkDailyCap() {
   const d = new Date().toDateString();
@@ -755,7 +758,7 @@ function checkDailyCap() {
 
 // ── MAIN DIAGNOSE FUNCTION ────────────────────────────────────────────────────
 async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", mode="farmer", category="crops" }) {
-  checkDailyCap();
+  try { checkDailyCap(); } catch (e) { _setAi(false, e.message); throw e; }
   const content = [];
 
   if (imageBase64) {
@@ -793,6 +796,7 @@ async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", 
       }
     );
 
+    _setAi(true, "OK");
     const raw   = response.data.content?.map(b => b.text || "").join("").trim();
     const clean = raw.replace(/```json|```/g, "").trim();
     return JSON.parse(clean);
@@ -808,8 +812,9 @@ async function diagnose({ imageBase64, imageType="image/jpeg", text, lang="en", 
     console.error("Model:", "claude-sonnet-4-6");
     console.error("======================");
     const msg = errBody?.error?.message || err.message || "AI diagnosis failed";
+    _setAi(false, msg);
     throw new Error(msg);
   }
 }
 
-module.exports = { diagnose, tryOfflineCache, OFFLINE_CACHE, CACHE_VERSION };
+module.exports = { diagnose, tryOfflineCache, OFFLINE_CACHE, CACHE_VERSION, getAiStatus };
