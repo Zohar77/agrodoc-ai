@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -189,8 +189,14 @@ const LANG_NAMES={en:'English',pcm:'Pidgin',ha:'Hausa',yo:'Yoruba',ig:'Igbo'};
 const CAT_EMOJI={crops:'🌿',poultry:'🐔',fish:'🐟',livestock:'🐄'};
 const SEV_COLOR={mild:'#6ee569',moderate:'#f5c518',severe:'#f87171',unknown:'#3d6b4a'};
 
+function normBackend(v){
+  v=(v||'').trim();
+  if(!v) return location.origin;
+  if(!/^https?:\/\//i.test(v)) v='https://'+v;
+  try{ return new URL(v).origin; }catch(e){ return location.origin; }
+}
 function doLogin(){
-  B=(document.getElementById('bu').value||'').trim().replace(/\/$/,'');
+  B=normBackend(document.getElementById('bu').value);
   K=document.getElementById('ak').value.trim();
   if(!B||!K){showErr('Please fill in both fields');return;}
   localStorage.setItem('adab',B);
@@ -214,7 +220,7 @@ function makeBars(data, maxVal, colorFn){
 }
 
 async function loadAll(){
-  if(!B){B=localStorage.getItem('adab')||'';if(!B)return;}
+  if(!B){B=normBackend(localStorage.getItem('adab'));}
   document.getElementById('ls').style.display='none';
   document.getElementById('ds').classList.add('on');
   document.getElementById('st').innerHTML='<span class="dot"></span>Loading...';
@@ -402,7 +408,7 @@ function showExportMsg(msg){
 // Auto-fill backend URL if saved
 window.onload=()=>{
   const saved=localStorage.getItem('adab');
-  if(saved) document.getElementById('bu').value=saved;
+  document.getElementById('bu').value=location.origin;
 };
 </script>
 </body>
